@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:best_browser/Service/LocalData.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +36,8 @@ class _SplashScreenState extends State<SplashScreen> {
       }
     });
 
-    new Future.delayed(const Duration(seconds: 5), () async {
-      Get.offAndToNamed('/intro/1');
+    new Future.delayed(const Duration(seconds: 3), () async {
+      LocalData().checkLocalData();
     });
   }
 

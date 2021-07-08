@@ -1,6 +1,6 @@
+import 'package:best_browser/Service/LocalData.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:sizer/sizer.dart';
 
 class IntroPageThird extends StatefulWidget {
@@ -105,12 +105,12 @@ class _IntroPageThirdState extends State<IntroPageThird> {
                           ),
                         ],
                       )),
-                      TextButton(
-                          onPressed: () {},
-                          child: Text(
-                            "SKIP",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                      // TextButton(
+                      //     onPressed: () {},
+                      //     child: Text(
+                      //       "SKIP",
+                      //       style: TextStyle(color: Colors.white),
+                      //     )),
                       TextButton(
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all(
@@ -123,7 +123,7 @@ class _IntroPageThirdState extends State<IntroPageThird> {
                                 borderRadius: BorderRadius.circular(200.0),
                               ))),
                           onPressed: () {
-                            Get.toNamed('/setup/city');
+                            LocalData().viewedIntro();
                           },
                           child: Icon(
                             Icons.play_arrow,

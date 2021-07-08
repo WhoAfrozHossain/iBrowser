@@ -1,3 +1,4 @@
+import 'package:best_browser/Service/LocalData.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -91,7 +92,9 @@ class _IntroPageSecondState extends State<IntroPageSecond> {
                           ],
                         )),
                         TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              LocalData().viewedIntro();
+                            },
                             child: Text(
                               "SKIP",
                               style: TextStyle(color: Colors.white),

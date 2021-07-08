@@ -8,11 +8,11 @@ import 'package:best_browser/Screens/Browser/models/favorite_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/pages/developers/main.dart';
 import 'package:best_browser/Screens/Browser/pages/settings/main.dart';
-import 'package:best_browser/Screens/Browser/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
@@ -67,6 +67,16 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             (await _webViewController?.getUrl())?.toString() ?? "";
       }
     });
+
+    // _searchController!.addListener(() {
+    //   final newText = _searchController!.text.toLowerCase();
+    //   _searchController!.value = _searchController!.value.copyWith(
+    //     text: newText,
+    //     selection: TextSelection(
+    //         baseOffset: newText.length, extentOffset: newText.length),
+    //     composing: TextRange.empty,
+    //   );
+    // });
   }
 
   @override
@@ -95,7 +105,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           return Selector<WebViewModel, bool>(
               selector: (context, webViewModel) => webViewModel.isIncognitoMode,
               builder: (context, isIncognitoMode, child) {
-                return leading != null
+                return /*leading != null
                     ? AppBar(
                         backgroundColor:
                             isIncognitoMode ? Colors.black87 : Colors.blue,
@@ -104,13 +114,14 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
                       )
-                    : AppBar(
-                        backgroundColor:
-                            isIncognitoMode ? Colors.black87 : Colors.blue,
-                        titleSpacing: 10.0,
-                        title: _buildSearchTextField(),
-                        actions: _buildActionsMenu(),
-                      );
+                    : */
+                    AppBar(
+                  backgroundColor:
+                      isIncognitoMode ? Colors.black87 : Colors.blue,
+                  titleSpacing: 10.0,
+                  title: _buildSearchTextField(),
+                  actions: _buildActionsMenu(),
+                );
               });
         });
   }
@@ -156,9 +167,15 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           TextField(
             onSubmitted: (value) {
               var url = Uri.parse(value.trim());
-              if (!url.scheme.startsWith("http") &&
-                  !Util.isLocalizedContent(url)) {
+
+              print(url.scheme);
+
+              if (!value.contains(".")) {
                 url = Uri.parse(settings.searchEngine.searchUrl + value);
+              } else {
+                if (!value.contains("www.")) {
+                  url = Uri.parse("www." + value);
+                }
               }
 
               if (_webViewController != null) {
@@ -596,7 +613,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 );
               case PopupMenuActions.HISTORY:
                 return CustomPopupMenuItem<String>(
-                  enabled: browserModel.getCurrentTab() != null,
+                  // enabled: browserModel.getCurrentTab() != null,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -610,7 +627,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 );
               case PopupMenuActions.DOWNLOADS:
                 return CustomPopupMenuItem<String>(
-                  enabled: browserModel.getCurrentTab() != null,
+                  // enabled: browserModel.getCurrentTab() != null,
                   value: choice,
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -662,10 +679,12 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         showFavorites();
         break;
       case PopupMenuActions.HISTORY:
-        showHistory();
+        Get.toNamed('/history/browsing');
+        // showHistory();
         break;
       case PopupMenuActions.DOWNLOADS:
-        showHistory();
+        Get.toNamed('/history/download');
+        // showHistory();
         break;
       case PopupMenuActions.SHARE:
         share();

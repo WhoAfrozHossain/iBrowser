@@ -1,7 +1,10 @@
+import 'package:best_browser/PoJo/HistoryModel.dart';
+import 'package:best_browser/Service/SQFlite/DBQueries.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 
 class BrowsingHistory extends StatefulWidget {
@@ -10,6 +13,18 @@ class BrowsingHistory extends StatefulWidget {
 }
 
 class _BrowsingHistoryState extends State<BrowsingHistory> {
+  List<HistoryModel>? histories = [];
+
+  @override
+  void initState() {
+    DBQueries().getHistory().then((value) {
+      setState(() {
+        histories = value;
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,68 +57,78 @@ class _BrowsingHistoryState extends State<BrowsingHistory> {
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            padding: EdgeInsets.all(10),
-            child: ListView.separated(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: 20,
-                separatorBuilder: (context, index) {
-                  return SizedBox(
-                    height: 5,
-                  );
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  return Container(
-                    color: UIColors.backgroundColor,
-                    padding: EdgeInsets.all(5),
-                    child: Row(
-                      children: [
-                        Icon(
-                          CupertinoIcons.link_circle,
-                          size: 30,
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Page Title",
-                                style: TextStyle(
-                                    color: UIColors.blackColor,
-                                    fontSize: 12.sp),
+        child: histories == null
+            ? Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
+                padding: EdgeInsets.all(10),
+                child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: histories!.length,
+                    separatorBuilder: (context, index) {
+                      return SizedBox(
+                        height: 5,
+                      );
+                    },
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        color: UIColors.backgroundColor,
+                        padding: EdgeInsets.all(5),
+                        child: Row(
+                          children: [
+                            histories![index].favicon != null
+                                ? Container(
+                                    height: 30,
+                                    width: 30,
+                                    child: Image.network(
+                                        histories![index].favicon!),
+                                  )
+                                : Icon(
+                                    CupertinoIcons.link_circle,
+                                    size: 30,
+                                  ),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    histories![index].title!,
+                                    style: TextStyle(
+                                        color: UIColors.blackColor,
+                                        fontSize: 12.sp),
+                                  ),
+                                  Text(
+                                    histories![index].url!,
+                                    style: TextStyle(
+                                        color: UIColors.blackColor,
+                                        fontSize: 10.sp),
+                                  ),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      DateFormat.yMMMEd().format(DateTime.parse(
+                                          histories![index].date!)),
+                                      style: TextStyle(
+                                          color: UIColors.blackColor,
+                                          fontSize: 10.sp),
+                                    ),
+                                  )
+                                ],
                               ),
-                              Text(
-                                "https://www.google.com/",
-                                style: TextStyle(
-                                    color: UIColors.blackColor,
-                                    fontSize: 10.sp),
-                              ),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: Text(
-                                  "05 Jan 2021",
-                                  style: TextStyle(
-                                      color: UIColors.blackColor,
-                                      fontSize: 10.sp),
-                                ),
-                              )
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Icon(CupertinoIcons.clear_circled)
+                          ],
                         ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Icon(CupertinoIcons.clear_circled)
-                      ],
-                    ),
-                  );
-                })),
+                      );
+                    })),
       ),
     );
   }

@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:best_browser/Controller/Controller.dart';
 import 'package:best_browser/Screens/Browser/app_bar/browser_app_bar.dart';
 import 'package:best_browser/Screens/Browser/custom_image.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/tab_popup_menu_actions.dart';
 import 'package:best_browser/Screens/Browser/tab_viewer.dart';
 import 'package:best_browser/Screens/Browser/webview_tab.dart';
+import 'package:best_browser/Service/LocalData.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 import 'package:sizer/sizer.dart';
 
 import 'app_bar/tab_viewer_app_bar.dart';
@@ -28,6 +31,8 @@ class Browser extends StatefulWidget {
 }
 
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
+  Controller myController = Get.put(Controller());
+
   static const platform =
       const MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
 
@@ -38,6 +43,9 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    myController.getNews();
+    myController.getFavoriteSites();
+    myController.getOtherSiteRevenue();
     getIntentData();
   }
 
@@ -698,8 +706,33 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                   },
                   child: bottomMenuItem("Bookmarks", Icons.bookmarks)),
               TextButton(
-                  onPressed: () {
-                    // Get.offAndToNamed('/pathology/information');
+                  onPressed: () async {
+                    var browserModel =
+                        Provider.of<BrowserModel>(context, listen: false);
+                    var webViewModel =
+                        browserModel.getCurrentTab()?.webViewModel;
+                    var _webViewController = webViewModel?.webViewController;
+
+                    var currentWebViewModel =
+                        Provider.of<WebViewModel>(context, listen: false);
+
+                    if (_webViewController != null) {
+                      webViewModel?.isDesktopMode = !webViewModel.isDesktopMode;
+                      currentWebViewModel.isDesktopMode =
+                          webViewModel?.isDesktopMode ?? false;
+
+                      await _webViewController.setOptions(
+                          options: InAppWebViewGroupOptions(
+                              crossPlatform: InAppWebViewOptions(
+                                  preferredContentMode:
+                                      webViewModel?.isDesktopMode ?? false
+                                          ? UserPreferredContentMode.DESKTOP
+                                          : UserPreferredContentMode
+                                              .RECOMMENDED)));
+                      await _webViewController.reload();
+
+                      Get.back();
+                    }
                   },
                   child: bottomMenuItem(
                       "Desktop Mode", Icons.desktop_mac_rounded)),
@@ -717,7 +750,14 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                       "Downloads", CupertinoIcons.cloud_download_fill)),
               TextButton(
                   onPressed: () {
-                    // Get.offAndToNamed('/history/download');
+                    var browserModel =
+                        Provider.of<BrowserModel>(context, listen: false);
+                    var webViewModel =
+                        browserModel.getCurrentTab()?.webViewModel;
+                    var url = webViewModel?.url;
+                    if (url != null) {
+                      Share.share(url.toString(), subject: webViewModel?.title);
+                    }
                   },
                   child: bottomMenuItem("Share", Icons.share_outlined)),
               TextButton(
@@ -758,7 +798,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: IconButton(
                       onPressed: () {
-                        Get.back();
+                        LocalData().logOut();
                       },
                       icon: Icon(
                         Icons.logout,

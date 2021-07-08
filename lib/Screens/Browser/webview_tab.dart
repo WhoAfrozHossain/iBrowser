@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:best_browser/Controller/Controller.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/util.dart';
+import 'package:best_browser/Service/SQFlite/DBQueries.dart';
 import 'package:best_browser/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,6 +30,8 @@ class WebViewTab extends StatefulWidget {
 }
 
 class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
+  Controller myController = Get.put(Controller());
+
   InAppWebViewController? _webViewController;
   bool _isWindowClosed = false;
 
@@ -166,6 +171,26 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         widget.webViewModel.loaded = false;
         widget.webViewModel.setLoadedResources([]);
         widget.webViewModel.setJavaScriptConsoleResults([]);
+
+        // Open inserting history
+
+        String? title, currentUrl, favicon;
+
+        await controller.getTitle().then((value) => title = value);
+        await controller
+            .getUrl()
+            .then((value) => currentUrl = value.toString());
+        await controller
+            .getFavicons()
+            .then((value) => favicon = value[0].url.toString());
+
+        DBQueries().insertHistory(title, currentUrl, favicon);
+
+        // Close inserting history
+
+        // Check URL
+        myController.checkSite(currentUrl!);
+        // Check URL
 
         if (isCurrentTab(currentWebViewModel)) {
           currentWebViewModel.updateWithValue(widget.webViewModel);

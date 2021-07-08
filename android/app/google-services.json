@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "456362561119",
+    "project_id": "ibrowser-13d48",
+    "storage_bucket": "ibrowser-13d48.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:456362561119:android:0aebfdb034e1dbbb04d5ea",
+        "android_client_info": {
+          "package_name": "com.raybim.iBrowser"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "456362561119-51tprjfctg2bjm70iduo3j11g37ak7rd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEC93_tWrWVsh9dAg_BM4Te7fiH4oCLIA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "456362561119-51tprjfctg2bjm70iduo3j11g37ak7rd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

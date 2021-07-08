@@ -91,7 +91,7 @@ class _GettingStartedState extends State<GettingStarted> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Get.toNamed('/auth/register');
+                            Get.toNamed('/setup/city');
                           },
                           child: Text(
                             "Register Now",

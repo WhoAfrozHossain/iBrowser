@@ -198,13 +198,14 @@ class BrowserModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addWebArchive(String url, WebArchiveModel webArchiveModel) {
+  void addWebArchjive(String url, WebArchiveModel webArchiveModel) {
     _webArchives.putIfAbsent(url, () => webArchiveModel);
     notifyListeners();
   }
 
   void addWebArchives(Map<String, WebArchiveModel> webArchives) {
     _webArchives.addAll(webArchives);
+    print(webArchives);
     notifyListeners();
   }
 
