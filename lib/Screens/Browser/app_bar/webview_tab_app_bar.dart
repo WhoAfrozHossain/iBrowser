@@ -8,6 +8,7 @@ import 'package:best_browser/Screens/Browser/models/favorite_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/pages/developers/main.dart';
 import 'package:best_browser/Screens/Browser/pages/settings/main.dart';
+import 'package:best_browser/Service/Network.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -62,7 +63,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
           _searchController!.text.isEmpty) {
         var browserModel = Provider.of<BrowserModel>(context, listen: true);
         var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-        var _webViewController = webViewModel?.webViewController;
+        InAppWebViewController? _webViewController =
+            webViewModel?.webViewController;
         _searchController!.text =
             (await _webViewController?.getUrl())?.toString() ?? "";
       }
@@ -116,6 +118,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       )
                     : */
                     AppBar(
+                  automaticallyImplyLeading: false,
                   backgroundColor:
                       isIncognitoMode ? Colors.black87 : Colors.blue,
                   titleSpacing: 10.0,
@@ -174,7 +177,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                 url = Uri.parse(settings.searchEngine.searchUrl + value);
               } else {
                 if (!value.contains("www.")) {
-                  url = Uri.parse("www." + value);
+                  value = "www." + value;
+                  url = Uri.parse(value);
+                }
+                if (!value.startsWith("http")) {
+                  url = Uri.parse("https://" + value);
                 }
               }
 
@@ -198,7 +205,17 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               border: outlineBorder,
               focusedBorder: outlineBorder,
               enabledBorder: outlineBorder,
-              hintText: "Search for or type a web address",
+              suffixIcon: IconButton(
+                onPressed: () {
+                  Network().createBookmark(
+                      webViewModel.title, webViewModel.url.toString());
+                },
+                icon: Icon(
+                  Icons.star,
+                  color: Colors.yellow,
+                ),
+              ),
+              hintText: "Search or type web address",
               hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
             ),
             style: TextStyle(color: Colors.black, fontSize: 16.0),
@@ -214,9 +231,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   if (webViewModel.url != null &&
                       webViewModel.url!.scheme == "file") {
                     icon = Icons.offline_pin;
-                  } else {
-                    icon = Icons.lock;
                   }
+                  /* else {
+                    icon = Icons.lock;
+                  }*/
                 }
 
                 return Icon(
@@ -226,7 +244,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               },
             ),
             onPressed: () {
-              showUrlInfo();
+              // showUrlInfo();
             },
           ),
         ],
@@ -676,7 +694,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         addNewIncognitoTab();
         break;
       case PopupMenuActions.BOOKMARKS:
-        showFavorites();
+        Get.toNamed('/bookmarks');
         break;
       case PopupMenuActions.HISTORY:
         Get.toNamed('/history/browsing');

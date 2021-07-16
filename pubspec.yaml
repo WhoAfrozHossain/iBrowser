@@ -28,6 +28,7 @@ dependencies:
   sizer: ^2.0.13
   get: ^4.1.4
   get_storage: ^2.0.2
+  cached_network_image: ^3.0.0
   firebase_messaging: ^10.0.0
   flutter_local_notifications: ^5.0.0+4
   intl: ^0.17.0
@@ -35,6 +36,7 @@ dependencies:
   flutter_inappwebview: ^5.3.2
   flutter_downloader: ^1.6.0
   path_provider: ^2.0.1
+  downloads_path_provider_28: ^0.1.2
   provider: ^5.0.0
   share: ^2.0.1
   share_extend: ^2.0.0
@@ -47,6 +49,7 @@ dependencies:
   flutter_colorpicker: ^0.4.0
   http: ^0.13.3
   sqflite: ^2.0.0+3
+  app_review: ^2.1.1+1
   
 dev_dependencies:
   flutter_test:

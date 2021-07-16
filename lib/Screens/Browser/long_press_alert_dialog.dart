@@ -1,6 +1,9 @@
 // import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
+
 import 'package:best_browser/Screens/Browser/custom_image.dart';
 import 'package:best_browser/Screens/Browser/webview_tab.dart';
+import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
@@ -268,16 +272,30 @@ class _LongPressAlertDialogState extends State<LongPressAlertDialog> {
       onTap: () async {
         if (widget.hitTestResult.extra != null) {
           var uri = Uri.parse(widget.hitTestResult.extra!);
-          String path = uri.path;
-          String fileName = path.substring(path.lastIndexOf('/') + 1);
+          // String path = uri.path;
+          // String fileName = path.substring(path.lastIndexOf('/') + 1);
 
-          final taskId = await FlutterDownloader.enqueue(
-            url: (widget.hitTestResult.extra)!,
-            fileName: fileName,
-            savedDir: (await getExternalStorageDirectory())!.path,
-            showNotification: true,
-            openFileFromNotification: true,
-          );
+          if (await Permission.storage.request().isGranted) {
+            Directory? downloadPath =
+                await DownloadsPathProvider.downloadsDirectory;
+            print(downloadPath!.path);
+            String path = uri.path;
+            String fileName = path.substring(path.lastIndexOf('/') + 1);
+
+            print((await getTemporaryDirectory()).path);
+            print("start download");
+            print(downloadPath);
+            print(path);
+            print(fileName);
+
+            final taskId = await FlutterDownloader.enqueue(
+              url: uri.toString(),
+              fileName: fileName,
+              savedDir: downloadPath.path,
+              showNotification: true,
+              openFileFromNotification: true,
+            );
+          }
         }
         Navigator.pop(context);
       },

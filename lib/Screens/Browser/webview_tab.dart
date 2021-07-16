@@ -1,16 +1,20 @@
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:best_browser/Controller/Controller.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/util.dart';
 import 'package:best_browser/Service/SQFlite/DBQueries.dart';
 import 'package:best_browser/main.dart';
+import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -38,10 +42,23 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
   TextEditingController _httpAuthUsernameController = TextEditingController();
   TextEditingController _httpAuthPasswordController = TextEditingController();
 
+  ReceivePort _port = ReceivePort();
+
   @override
   void initState() {
     WidgetsBinding.instance!.addObserver(this);
     super.initState();
+
+    IsolateNameServer.registerPortWithName(
+        _port.sendPort, 'downloader_send_port');
+    _port.listen((dynamic data) {
+      String id = data[0];
+      DownloadTaskStatus status = data[1];
+      int progress = data[2];
+      setState(() {});
+    });
+
+    FlutterDownloader.registerCallback(downloadCallback);
   }
 
   @override
@@ -54,7 +71,16 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
     WidgetsBinding.instance!.removeObserver(this);
 
+    IsolateNameServer.removePortNameMapping('downloader_send_port');
+
     super.dispose();
+  }
+
+  static void downloadCallback(
+      String id, DownloadTaskStatus status, int progress) {
+    final SendPort? send =
+        IsolateNameServer.lookupPortByName('downloader_send_port');
+    send!.send([id, status, progress]);
   }
 
   @override
@@ -128,6 +154,11 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.crossPlatform.userAgent =
         "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
     initialOptions.crossPlatform.transparentBackground = true;
+    initialOptions.crossPlatform.contentBlockers = [
+      ContentBlocker(
+          trigger: ContentBlockerTrigger(urlFilter: 'admob.com'),
+          action: ContentBlockerAction(type: ContentBlockerActionType.BLOCK))
+    ];
 
     initialOptions.android.safeBrowsingEnabled = true;
     initialOptions.android.disableDefaultErrorPage = true;
@@ -325,7 +356,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         var url = navigationAction.request.url;
 
         if (url != null &&
-            !["http", "https", "file", "chrome", "data", "javascript", "about"]
+            !["https", "http", "file", "chrome", "data", "javascript", "about"]
                 .contains(url.scheme)) {
           if (await canLaunch(url.toString())) {
             // Launch the App
@@ -340,16 +371,27 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         return NavigationActionPolicy.ALLOW;
       },
       onDownloadStart: (controller, url) async {
-        String path = url.path;
-        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        if (await Permission.storage.request().isGranted) {
+          Directory? downloadPath =
+              await DownloadsPathProvider.downloadsDirectory;
+          print(downloadPath!.path);
+          String path = url.path;
+          String fileName = path.substring(path.lastIndexOf('/') + 1);
 
-        final taskId = await FlutterDownloader.enqueue(
-          url: url.toString(),
-          fileName: fileName,
-          savedDir: (await getTemporaryDirectory()).path,
-          showNotification: true,
-          openFileFromNotification: true,
-        );
+          print((await getTemporaryDirectory()).path);
+          print("start download");
+          print(downloadPath);
+          print(path);
+          print(fileName);
+
+          final taskId = await FlutterDownloader.enqueue(
+            url: url.toString(),
+            fileName: fileName,
+            savedDir: downloadPath.path,
+            showNotification: true,
+            openFileFromNotification: true,
+          );
+        }
       },
       onReceivedServerTrustAuthRequest: (controller, challenge) async {
         var sslError = challenge.protectionSpace.sslError;

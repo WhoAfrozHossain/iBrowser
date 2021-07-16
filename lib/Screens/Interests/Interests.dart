@@ -56,7 +56,7 @@ class _InterestScreenState extends State<InterestScreen> {
         ),
         child: interests.length == 0
             ? Center(
-                child: CircularProgressIndicator(),
+                child: CupertinoActivityIndicator(),
               )
             : SafeArea(
                 child: Column(
@@ -72,7 +72,9 @@ class _InterestScreenState extends State<InterestScreen> {
                             child: Text(
                               "Interests",
                               style: TextStyle(
-                                  fontSize: 18.sp, color: Colors.white),
+                                fontSize: 18.sp,
+                                color: Colors.white,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -95,20 +97,24 @@ class _InterestScreenState extends State<InterestScreen> {
                                   if (switchValue[index]) {
                                     await FirebaseMessaging.instance
                                         .subscribeToTopic(
-                                            interests[index].topic!);
+                                            interests[index].sId!);
                                     print(
                                         "Subscribe " + interests[index].topic!);
                                   } else {
                                     await FirebaseMessaging.instance
                                         .unsubscribeFromTopic(
-                                            interests[index].topic!);
+                                            interests[index].sId!);
                                     print("Unsubscribe " +
                                         interests[index].topic!);
                                   }
                                 },
+                                activeColor: Colors.white,
                                 title: Text(
                                   interests[index].topic!,
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               );
                             },

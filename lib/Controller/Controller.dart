@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:best_browser/PoJo/NewsModel.dart';
 import 'package:best_browser/PoJo/OthersSitesModel.dart';
 import 'package:best_browser/PoJo/SpecialSitesModel.dart';
+import 'package:best_browser/Service/LocalData.dart';
 import 'package:best_browser/Service/Network.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ class Controller extends GetxController {
   TextEditingController submitController = new TextEditingController();
 
   List<NewsModel> news = [];
+  NewsModel? selectedNews;
   List<SpecialSitesModel> specialSites = [];
   OthersSitesModel? otherSites;
 
@@ -34,21 +36,24 @@ class Controller extends GetxController {
 
   clear() {
     news.clear();
+    selectedNews = null;
     specialSites.clear();
     otherSites = null;
     isSpecialSite = null;
     specialSiteUrl = null;
-    _revenueTimer!.cancel();
+    if (_revenueTimer != null) _revenueTimer!.cancel();
 
     update();
   }
 
   checkSite(String url) {
-    if (isSpecialSite == null) {
-      setSite(url);
-    } else if (isSpecialSite!) {
-      if (!url.contains(specialSiteUrl!)) {
+    if (LocalData().checkUserLogin()) {
+      if (isSpecialSite == null) {
         setSite(url);
+      } else if (isSpecialSite!) {
+        if (!url.contains(specialSiteUrl!)) {
+          setSite(url);
+        }
       }
     }
   }

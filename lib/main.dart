@@ -9,6 +9,7 @@ import 'package:best_browser/Screens/Auth/Login.dart';
 import 'package:best_browser/Screens/Auth/RecoverAccount.dart';
 import 'package:best_browser/Screens/Auth/Register.dart';
 import 'package:best_browser/Screens/Auth/SetPassword.dart';
+import 'package:best_browser/Screens/Bookmark/Bookmark.dart';
 import 'package:best_browser/Screens/Browser/browser.dart';
 import 'package:best_browser/Screens/Browser/models/browser_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
@@ -19,7 +20,9 @@ import 'package:best_browser/Screens/Interests/Interests.dart';
 import 'package:best_browser/Screens/Intro/intro1.dart';
 import 'package:best_browser/Screens/Intro/intro2.dart';
 import 'package:best_browser/Screens/Intro/intro3.dart';
+import 'package:best_browser/Screens/News/NewsView.dart';
 import 'package:best_browser/Screens/Setting/AccountSetting.dart';
+import 'package:best_browser/Screens/Withdraw/Withdraw.dart';
 import 'package:best_browser/SplashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -156,51 +159,79 @@ void main() async {
         initialRoute: '/',
         defaultTransition: Transition.noTransition,
         getPages: [
-          GetPage(name: '/', page: () => SplashScreen()),
-          GetPage(name: '/browser', page: () => Browser()),
           GetPage(
-              name: '/intro/1',
-              page: () => IntroPageFirst(),
-              transition: Transition.rightToLeft),
+            name: '/',
+            page: () => SplashScreen(),
+          ),
           GetPage(
-              name: '/intro/2',
-              page: () => IntroPageSecond(),
-              transition: Transition.rightToLeft),
+            name: '/browser',
+            page: () => Browser(),
+          ),
           GetPage(
-              name: '/intro/3',
-              page: () => IntroPageThird(),
-              transition: Transition.rightToLeft),
+            name: '/intro/1',
+            page: () => IntroPageFirst(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/interest',
-              page: () => InterestScreen(),
-              transition: Transition.rightToLeft),
+            name: '/intro/2',
+            page: () => IntroPageSecond(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/setup/city',
-              page: () => CitySelector(),
-              transition: Transition.rightToLeft),
+            name: '/intro/3',
+            page: () => IntroPageThird(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/auth/start',
-              page: () => GettingStarted(),
-              transition: Transition.rightToLeft),
+            name: '/interest',
+            page: () => InterestScreen(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/auth/login',
-              page: () => Login(),
-              transition: Transition.rightToLeft),
+            name: '/setup/city',
+            page: () => CitySelector(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/auth/recover',
-              page: () => RecoverAccount(),
-              transition: Transition.rightToLeft),
+            name: '/auth/start',
+            page: () => GettingStarted(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/auth/setPassword',
-              page: () => SetPassword(),
-              transition: Transition.rightToLeft),
+            name: '/auth/login',
+            page: () => Login(),
+            transition: Transition.rightToLeft,
+          ),
           GetPage(
-              name: '/auth/register',
-              page: () => Register(),
-              transition: Transition.rightToLeft),
+            name: '/auth/recover',
+            page: () => RecoverAccount(),
+            transition: Transition.rightToLeft,
+          ),
+          GetPage(
+            name: '/auth/setPassword',
+            page: () => SetPassword(),
+            transition: Transition.rightToLeft,
+          ),
+          GetPage(
+            name: '/auth/register',
+            page: () => Register(),
+            transition: Transition.rightToLeft,
+          ),
+          GetPage(
+            name: '/newsView',
+            page: () => NewsView(),
+          ),
           GetPage(
             name: '/earning/dashboard',
             page: () => EarningDashboard(),
+          ),
+          GetPage(
+            name: '/withdraw',
+            page: () => Withdraw(),
+          ),
+          GetPage(
+            name: '/bookmarks',
+            page: () => Bookmarks(),
           ),
           GetPage(
             name: '/history/download',

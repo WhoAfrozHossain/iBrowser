@@ -112,7 +112,89 @@ class _AdsBrowsingState extends State<AdsBrowsing> {
                               itemBuilder: (BuildContext context, int index) {
                                 return GestureDetector(
                                   onTap: () {
-                                    Get.toNamed('/ads/visit/${ads[index].sId}');
+                                    Get.defaultDialog(
+                                        title: "Ad Instruction",
+                                        barrierDismissible: false,
+                                        content: Text(ads[index].instruction!),
+                                        actions: [
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: Container(
+                                                  width: Get.width,
+                                                  child: TextButton(
+                                                      style: ButtonStyle(
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all(Colors
+                                                                      .grey),
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all(EdgeInsets
+                                                                      .all(15)),
+                                                          shape: MaterialStateProperty.all<
+                                                                  RoundedRectangleBorder>(
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        200.0),
+                                                          ))),
+                                                      onPressed: () {
+                                                        Get.back();
+                                                      },
+                                                      child: Text(
+                                                        "Cancel",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.sp),
+                                                      )),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 20,
+                                              ),
+                                              Expanded(
+                                                child: Container(
+                                                  width: Get.width,
+                                                  child: TextButton(
+                                                      style: ButtonStyle(
+                                                          backgroundColor:
+                                                              MaterialStateProperty
+                                                                  .all(UIColors
+                                                                      .buttonColor),
+                                                          padding:
+                                                              MaterialStateProperty
+                                                                  .all(EdgeInsets
+                                                                      .all(15)),
+                                                          shape: MaterialStateProperty.all<
+                                                                  RoundedRectangleBorder>(
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        200.0),
+                                                          ))),
+                                                      onPressed: () {
+                                                        print(ads[index].title);
+                                                        print(ads[index]
+                                                            .minVisitingTime);
+                                                        print(
+                                                            ads[index].revenue);
+                                                        Get.offAndToNamed(
+                                                            '/ads/visit/${ads[index].sId}');
+                                                      },
+                                                      child: Text(
+                                                        "Continue",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 12.sp),
+                                                      )),
+                                                ),
+                                              )
+                                            ],
+                                          )
+                                        ]);
                                   },
                                   child: Container(
                                     color: UIColors.backgroundColor,

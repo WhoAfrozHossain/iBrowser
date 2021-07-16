@@ -43,7 +43,9 @@
     <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/renderscript_source_output_dir/debug/out" />
     <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/renderscript_source_output_dir/debugAndroidTest/out" />
     <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/res/resValues/androidTest/debug" />
-    <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/res/resValues/debug" />
+    <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/res/resValues/debug">
+      <sourceFolder url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/res/resValues/debug" type="java-resource" />
+    </content>
     <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/res/rs/androidTest/debug" />
     <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/res/rs/debug" />
     <content url="file://$MODULE_DIR$/../../../../build/flutter_downloader/generated/source/buildConfig/androidTest/debug" />

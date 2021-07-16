@@ -23,7 +23,6 @@ class DBQueries {
   Future<List<HistoryModel>> getHistory() async {
     List<HistoryModel> history = [];
     final allRows = await dbHelper.queryAllRows();
-    print(allRows);
     allRows.forEach((row) {
       HistoryModel model = new HistoryModel(
           id: row[DatabaseHelper.columnHistoryId],
@@ -33,6 +32,7 @@ class DBQueries {
           date: row[DatabaseHelper.columnHistoryDate]);
       history.add(model);
     });
+    history.sort((a, b) => b.id!.compareTo(a.id!));
     return history;
   }
 

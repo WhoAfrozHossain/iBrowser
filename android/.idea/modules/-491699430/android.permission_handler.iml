@@ -42,7 +42,9 @@
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/renderscript_source_output_dir/debug/out" />
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/renderscript_source_output_dir/debugAndroidTest/out" />
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/res/resValues/androidTest/debug" />
-    <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/res/resValues/debug" />
+    <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/res/resValues/debug">
+      <sourceFolder url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/res/resValues/debug" type="java-resource" />
+    </content>
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/res/rs/androidTest/debug" />
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/res/rs/debug" />
     <content url="file://$MODULE_DIR$/../../../../build/permission_handler/generated/source/buildConfig/androidTest/debug" />

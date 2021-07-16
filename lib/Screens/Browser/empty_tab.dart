@@ -2,14 +2,16 @@ import 'dart:async';
 
 import 'package:best_browser/Controller/Controller.dart';
 import 'package:best_browser/PoJo/NewsModel.dart';
+import 'package:best_browser/Screens/Browser/models/browser_model.dart';
+import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/webview_tab.dart';
+import 'package:best_browser/Service/Network.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import 'models/browser_model.dart';
-import 'models/webview_model.dart';
 
 class EmptyTab extends StatefulWidget {
   EmptyTab({Key? key}) : super(key: key);
@@ -44,7 +46,7 @@ class _EmptyTabState extends State<EmptyTab> {
       body: myController.news.length == 0 ||
               myController.specialSites.length == 0
           ? Center(
-              child: CircularProgressIndicator(),
+              child: CupertinoActivityIndicator(),
             )
           : NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification scrollInfo) {
@@ -77,9 +79,22 @@ class _EmptyTabState extends State<EmptyTab> {
                           child: Container(
                               child: Column(
                             children: [
-                              Image.network(
-                                  myController.specialSites[index].icon!),
-                              Text(myController.specialSites[index].title!)
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: CachedNetworkImage(
+                                  imageUrl: Network().rootUrl +
+                                      "images/" +
+                                      myController.specialSites[index].icon!,
+                                  placeholder: (context, url) =>
+                                      CupertinoActivityIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ),
+                              ),
+                              Text(
+                                myController.specialSites[index].title!,
+                                overflow: TextOverflow.ellipsis,
+                              )
                             ],
                           )),
                         );
@@ -117,98 +132,118 @@ class _EmptyTabState extends State<EmptyTab> {
     );
   }
 
-  void openNewTab(value) {
+  void openNewTab(String? value) {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
       webViewModel: WebViewModel(
-          url: Uri.parse(value.startsWith("www")
+          url: Uri.parse(value!.contains(".")
               ? value
               : settings.searchEngine.searchUrl + value)),
     ));
   }
 
   newsItem(NewsModel item) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(.5),
-            blurRadius: 4,
-            offset: Offset(4, 4), // changes position of shadow
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: Image.network(item.image!),
+    return InkWell(
+      onTap: () {
+        myController.selectedNews = item;
+        Get.toNamed('/newsView');
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(.5),
+              blurRadius: 4,
+              offset: Offset(4, 4), // changes position of shadow
+            ),
+          ],
+        ),
+        padding: EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: AspectRatio(
+                    aspectRatio: 1,
+                    child: CachedNetworkImage(
+                      imageUrl: Network().rootUrl + "images/" + item.image!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          CupertinoActivityIndicator(),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    ),
+                  ),
                 ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                  flex: 2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: Get.width,
-                        child: Text(
-                          item.title!,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
-                          textAlign: TextAlign.left,
+                SizedBox(
+                  width: 10,
+                ),
+                Expanded(
+                    flex: 2,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: Get.width,
+                          child: Text(
+                            item.title!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w500),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
-                      ),
-                      Container(
-                        child: Text(
-                          item.description!,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 15),
-                          textAlign: TextAlign.justify,
-                        ),
-                      )
-                    ],
-                  )),
-            ],
-          ),
-          SizedBox(
-            height: 5,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item.collectFrom!,
-                style: TextStyle(fontSize: 12),
-              ),
-              Text(
-                DateFormat.yMMMd()
-                    .add_jm()
-                    .format(DateTime.parse(item.createdAt!)),
-                style: TextStyle(fontSize: 12),
-              ),
-            ],
-          )
-        ],
+                        Container(
+                          child: Text(
+                            item.description!,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 15),
+                            textAlign: TextAlign.justify,
+                          ),
+                        )
+                      ],
+                    )),
+              ],
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    child: Text(
+                      item.collectFrom!,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12),
+                      textAlign: TextAlign.left,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 10,
+                ),
+                Text(
+                  DateFormat.yMMMd()
+                      .add_jm()
+                      .format(DateTime.parse(item.createdAt!)),
+                  style: TextStyle(fontSize: 12),
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

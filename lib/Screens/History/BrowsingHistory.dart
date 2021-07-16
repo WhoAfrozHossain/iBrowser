@@ -17,12 +17,16 @@ class _BrowsingHistoryState extends State<BrowsingHistory> {
 
   @override
   void initState() {
+    getHistory();
+    super.initState();
+  }
+
+  getHistory() {
     DBQueries().getHistory().then((value) {
       setState(() {
         histories = value;
       });
     });
-    super.initState();
   }
 
   @override
@@ -124,7 +128,13 @@ class _BrowsingHistoryState extends State<BrowsingHistory> {
                             SizedBox(
                               width: 10,
                             ),
-                            Icon(CupertinoIcons.clear_circled)
+                            IconButton(
+                              icon: Icon(CupertinoIcons.clear_circled),
+                              onPressed: () {
+                                DBQueries().deleteHistory(
+                                    histories![index].id.toString());
+                              },
+                            )
                           ],
                         ),
                       );

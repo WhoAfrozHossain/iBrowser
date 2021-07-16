@@ -38,11 +38,21 @@ class LocalData {
     Get.toNamed('/auth/register');
   }
 
-  void storeLoginUserData(var data) {
-    UserModel user = UserModel.fromJson(data);
+  void storeLoginUserData(var data, bool isSkip) {
     localData.write('login', true);
-    localData.write('userId', user.sId);
+
+    if (!isSkip) {
+      UserModel user = UserModel.fromJson(data);
+      localData.write('userId', user.sId);
+    }
     checkLocalData();
+  }
+
+  bool checkUserLogin() {
+    if (localData.read('userId') != null)
+      return true;
+    else
+      return false;
   }
 
   String getUserId() {

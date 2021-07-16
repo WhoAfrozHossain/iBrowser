@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:best_browser/Dialog/LoadingDialog.dart';
+import 'package:best_browser/Dialog/LoginDialog.dart';
 import 'package:best_browser/Dialog/MyDialog.dart';
 import 'package:best_browser/PoJo/AdsModel.dart';
+import 'package:best_browser/PoJo/BookmarkModel.dart';
 import 'package:best_browser/PoJo/CityModel.dart';
 import 'package:best_browser/PoJo/CountryModel.dart';
 import 'package:best_browser/PoJo/InterestModel.dart';
@@ -11,6 +13,7 @@ import 'package:best_browser/PoJo/OthersSitesModel.dart';
 import 'package:best_browser/PoJo/SpecialSitesModel.dart';
 import 'package:best_browser/PoJo/UserModel.dart';
 import 'package:best_browser/PoJo/WithdrawalMethodModel.dart';
+import 'package:best_browser/PoJo/WithdrawalRequestModel.dart';
 import 'package:best_browser/Service/LocalData.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -18,7 +21,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart';
 
 class Network {
-  String rootUrl = 'https://i-browser-api.herokuapp.com/';
+  String rootUrl = 'https://agile-anchorage-05164.herokuapp.com/';
 
   var http = Client();
 
@@ -26,16 +29,20 @@ class Network {
 
   final localData = GetStorage();
 
-  Future<UserModel> getUserData() async {
-    var jsonData;
-    var response = await http.get(
-      Uri.parse(rootUrl + "api/user/get-one/${LocalData().getUserId()}"),
-    );
-    jsonData = json.decode(response.body);
+  Future<UserModel?> getUserData() async {
+    if (LocalData().checkUserLogin()) {
+      var jsonData;
+      var response = await http.get(
+        Uri.parse(rootUrl + "api/user/get-one/${LocalData().getUserId()}"),
+      );
+      jsonData = json.decode(response.body);
 
-    var jsonUserData = jsonData['user'];
+      var jsonUserData = jsonData['user'];
 
-    return UserModel.fromJson(jsonUserData);
+      return UserModel.fromJson(jsonUserData);
+    } else {
+      return null;
+    }
   }
 
   Future<List<CountryModel>> getCountries() async {
@@ -109,7 +116,7 @@ class Network {
           .show();
     } else {
       var jsonUserData = jsonData['user'];
-      LocalData().storeLoginUserData(jsonUserData);
+      LocalData().storeLoginUserData(jsonUserData, false);
     }
   }
 
@@ -146,7 +153,7 @@ class Network {
           .show();
     } else {
       var jsonUserData = jsonData['user'];
-      LocalData().storeLoginUserData(jsonUserData);
+      LocalData().storeLoginUserData(jsonUserData, false);
     }
   }
 
@@ -196,7 +203,7 @@ class Network {
       LocalData().saveCountryAndCity(countryId, cityId);
       Get.snackbar("Success", "User Information Updated Successfully");
       var jsonUserData = jsonData['user'];
-      LocalData().storeLoginUserData(jsonUserData);
+      LocalData().storeLoginUserData(jsonUserData, false);
     }
   }
 
@@ -259,6 +266,8 @@ class Network {
         encoding: Encoding.getByName("utf-8"));
 
     jsonData = json.decode(response.body);
+
+    print(jsonData);
 
     Loading().dismiss();
 
@@ -351,6 +360,8 @@ class Network {
 
     jsonData = json.decode(response.body);
 
+    print(jsonData);
+
     Loading().dismiss();
 
     if (jsonData['error']) {
@@ -388,6 +399,164 @@ class Network {
 
     List<InterestModel> value = jsonData.map<InterestModel>((json) {
       return InterestModel.fromJson(json);
+    }).toList();
+
+    return value;
+  }
+
+  createBookmark(String? title, String? url) async {
+    if (LocalData().checkUserLogin()) {
+      Loading().show(context!);
+
+      Map<String, dynamic> data = {
+        'title': title,
+        'siteUrl': url,
+        'userId': LocalData().getUserId()
+      };
+      var jsonData;
+      var response = await http.post(Uri.parse(rootUrl + "api/bookmark/create"),
+          headers: {'Accept': 'application/json'},
+          body: data,
+          encoding: Encoding.getByName("utf-8"));
+
+      jsonData = json.decode(response.body);
+
+      print(jsonData);
+
+      Loading().dismiss();
+
+      if (jsonData['error']) {
+        CustomDialog(
+                title: 'Sorry',
+                body: "Something went wrong",
+                isOkButton: true,
+                okButtonText: "OK",
+                okButtonClick: () {
+                  Get.back();
+                },
+                isCancelButton: false)
+            .show();
+      } else {
+        CustomDialog(
+                title: 'Success',
+                body: "Bookmark Added Successfully",
+                isOkButton: true,
+                okButtonText: "OK",
+                okButtonClick: () {
+                  Get.back();
+                },
+                isCancelButton: false)
+            .show();
+      }
+    } else {
+      loginNotifyDialog();
+    }
+  }
+
+  Future<List<BookmarkModel>> getBookmarks() async {
+    var jsonData;
+
+    var response = await http.get(Uri.parse(
+        rootUrl + "api/bookmark/get-by-user/${LocalData().getUserId()}"));
+    var jsonOriginal = json.decode(response.body);
+
+    jsonData = jsonOriginal['bookmark'];
+
+    List<BookmarkModel> value = jsonData.map<BookmarkModel>((json) {
+      return BookmarkModel.fromJson(json);
+    }).toList();
+
+    return value;
+  }
+
+  Future<bool> deleteBookmark(String? id) async {
+    Loading().show(context!);
+
+    // Map<String, dynamic> data = {
+    //   'title': title,
+    //   'siteUrl': url,
+    //   'userId': LocalData().getUserId()
+    // };
+    var jsonData;
+    var response = await http.delete(
+        Uri.parse(rootUrl + "api/bookmark/delete-one/$id"),
+        headers: {'Accept': 'application/json'},
+        encoding: Encoding.getByName("utf-8"));
+
+    jsonData = json.decode(response.body);
+
+    print(jsonData);
+
+    Loading().dismiss();
+
+    return true;
+  }
+
+  Future<bool> createWithdrawRequest(
+      String? withdrawalMethodId, String? accountNo, String? amount) async {
+    Loading().show(context!);
+
+    Map<String, dynamic> data = {
+      'withdrawalMethodId': withdrawalMethodId,
+      'accountNo': accountNo,
+      'amount': amount,
+      'status': "",
+      'note': "",
+      'userId': LocalData().getUserId()
+    };
+    var jsonData;
+    var response = await http.post(
+        Uri.parse(rootUrl + "api/withdrawal-request/create"),
+        headers: {'Accept': 'application/json'},
+        body: data,
+        encoding: Encoding.getByName("utf-8"));
+
+    print(data);
+
+    jsonData = json.decode(response.body);
+
+    print(jsonData);
+
+    Loading().dismiss();
+
+    if (jsonData['error']) {
+      CustomDialog(
+              title: 'Sorry',
+              body: "Something went wrong",
+              isOkButton: true,
+              okButtonText: "OK",
+              okButtonClick: () {
+                Get.back();
+              },
+              isCancelButton: false)
+          .show();
+    } else {
+      CustomDialog(
+              title: 'Success',
+              body: "Withdraw Request Added Successfully",
+              isOkButton: true,
+              okButtonText: "OK",
+              okButtonClick: () {
+                Get.back();
+              },
+              isCancelButton: false)
+          .show();
+    }
+    return true;
+  }
+
+  Future<List<WithdrawalRequestModel>> getWithdrawalRequests() async {
+    var jsonData;
+
+    var response = await http.get(Uri.parse(rootUrl +
+        "api/withdrawal-request/get-by-user/${LocalData().getUserId()}"));
+    var jsonOriginal = json.decode(response.body);
+
+    jsonData = jsonOriginal['withdrawalRequest'];
+
+    List<WithdrawalRequestModel> value =
+        jsonData.map<WithdrawalRequestModel>((json) {
+      return WithdrawalRequestModel.fromJson(json);
     }).toList();
 
     return value;

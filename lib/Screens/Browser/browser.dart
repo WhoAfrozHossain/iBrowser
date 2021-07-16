@@ -1,7 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:best_browser/Controller/Controller.dart';
+import 'package:best_browser/Dialog/LoginDialog.dart';
+import 'package:best_browser/PoJo/UserModel.dart';
 import 'package:best_browser/Screens/Browser/app_bar/browser_app_bar.dart';
 import 'package:best_browser/Screens/Browser/custom_image.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
@@ -9,6 +10,7 @@ import 'package:best_browser/Screens/Browser/tab_popup_menu_actions.dart';
 import 'package:best_browser/Screens/Browser/tab_viewer.dart';
 import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:best_browser/Service/LocalData.dart';
+import 'package:best_browser/Service/Network.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,34 +35,44 @@ class Browser extends StatefulWidget {
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   Controller myController = Get.put(Controller());
 
-  static const platform =
-      const MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
+  // static const platform =
+  //     const MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
 
   var _isRestored = false;
 
   GlobalKey tabInkWellKey = new GlobalKey();
 
+  UserModel? userData;
+
   @override
   void initState() {
     super.initState();
+    myController.clear();
+
+    Network().getUserData().then((value) {
+      setState(() {
+        userData = value;
+      });
+    });
+
     myController.getNews();
     myController.getFavoriteSites();
     myController.getOtherSiteRevenue();
-    getIntentData();
+    // getIntentData();
   }
 
-  getIntentData() async {
-    if (Platform.isAndroid) {
-      String? url = await platform.invokeMethod("getIntentData");
-      if (url != null) {
-        var browserModel = Provider.of<BrowserModel>(context, listen: false);
-        browserModel.addTab(WebViewTab(
-          key: GlobalKey(),
-          webViewModel: WebViewModel(url: Uri.parse(url)),
-        ));
-      }
-    }
-  }
+  // getIntentData() async {
+  //   if (Platform.isAndroid) {
+  //     String? url = await platform.invokeMethod("getIntentData");
+  //     if (url != null) {
+  //       var browserModel = Provider.of<BrowserModel>(context, listen: false);
+  //       browserModel.addTab(WebViewTab(
+  //         key: GlobalKey(),
+  //         webViewModel: WebViewModel(url: Uri.parse(url)),
+  //       ));
+  //     }
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -144,7 +156,7 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
           },
           child: Scaffold(
             appBar: BrowserAppBar(),
-            body: _buildWebViewTabsContent(),
+            body: SafeArea(child: _buildWebViewTabsContent()),
             bottomNavigationBar: _bottomNavigationBar(),
           ),
         ));
@@ -514,9 +526,12 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                   flex: 2,
                   child: IconButton(
                       onPressed: () {
-                        Get.bottomSheet(openBottomSheet(),
-                            backgroundColor: Colors.white,
-                            clipBehavior: Clip.antiAlias);
+                        Get.bottomSheet(
+                          openBottomSheet(),
+                          backgroundColor: Colors.white,
+                          clipBehavior: Clip.antiAlias,
+                          isScrollControlled: true,
+                        );
                       },
                       icon: Icon(
                         Icons.dashboard_outlined,
@@ -536,279 +551,450 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   }
 
   openBottomSheet() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Icon(
-                  CupertinoIcons.person_alt_circle,
-                  size: 60,
-                ),
-                SizedBox(
-                  width: 5,
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Not Signed in",
-                        style: TextStyle(
-                            color: UIColors.blackColor, fontSize: 12.sp),
-                      ),
-                      Text(
-                        "Sign in to sync your browsing data and coin.",
-                        style: TextStyle(
-                            color: UIColors.blackColor, fontSize: 10.sp),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 35,
-                  color: UIColors.primaryDarkColor,
-                )
-              ],
-            )),
-        Container(
-          width: Get.width,
-          padding: EdgeInsets.all(10),
-          margin: EdgeInsets.fromLTRB(3, 0, 3, 0),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.withOpacity(.3), width: 1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    var browserModel = Provider.of<BrowserModel>(context, listen: false);
+    WebViewModel? webViewModel = browserModel.getCurrentTab()?.webViewModel;
+    var _webViewController = webViewModel?.webViewController;
+
+    var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+              padding: EdgeInsets.all(10),
+              child: Row(
                 children: [
-                  Text(
-                    "Privacy Report",
-                    style: TextStyle(color: Colors.grey),
+                  Icon(
+                    CupertinoIcons.person_alt_circle,
+                    size: 60,
                   ),
-                  Text(
-                    "Details",
-                    style: TextStyle(color: UIColors.primaryDarkColor),
-                  )
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Image.asset('assets/images/dashboard_icon_07.png'),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "500 Ads",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 9.sp),
-                          ),
-                          Text(
-                            "Blocked",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 9.sp),
-                          )
-                        ],
-                      )
-                    ],
-                  )),
                   SizedBox(
-                    width: 10,
+                    width: 5,
                   ),
                   Expanded(
-                      child: Row(
-                    children: [
-                      Image.asset('assets/images/dashboard_icon_08.png'),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "50.00 Mb",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 9.sp),
-                          ),
-                          Text(
-                            "Saved",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 9.sp),
-                          )
-                        ],
-                      )
-                    ],
-                  )),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Image.asset('assets/images/dashboard_icon_09.png'),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "50 Min",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 9.sp),
-                          ),
-                          Text(
-                            "Served",
-                            style:
-                                TextStyle(color: Colors.grey, fontSize: 9.sp),
-                          )
-                        ],
-                      )
-                    ],
-                  )),
-                ],
-              )
-            ],
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-          child: GridView.count(
-            physics: BouncingScrollPhysics(),
-            crossAxisCount: 4,
-            childAspectRatio: .9,
-            shrinkWrap: true,
-            children: [
-              TextButton(
-                  onPressed: () {
-                    // Get.offAndToNamed('/pathology/information');
-                  },
-                  child: bottomMenuItem("Bookmarks", Icons.bookmarks)),
-              TextButton(
-                  onPressed: () async {
-                    var browserModel =
-                        Provider.of<BrowserModel>(context, listen: false);
-                    var webViewModel =
-                        browserModel.getCurrentTab()?.webViewModel;
-                    var _webViewController = webViewModel?.webViewController;
-
-                    var currentWebViewModel =
-                        Provider.of<WebViewModel>(context, listen: false);
-
-                    if (_webViewController != null) {
-                      webViewModel?.isDesktopMode = !webViewModel.isDesktopMode;
-                      currentWebViewModel.isDesktopMode =
-                          webViewModel?.isDesktopMode ?? false;
-
-                      await _webViewController.setOptions(
-                          options: InAppWebViewGroupOptions(
-                              crossPlatform: InAppWebViewOptions(
-                                  preferredContentMode:
-                                      webViewModel?.isDesktopMode ?? false
-                                          ? UserPreferredContentMode.DESKTOP
-                                          : UserPreferredContentMode
-                                              .RECOMMENDED)));
-                      await _webViewController.reload();
-
-                      Get.back();
-                    }
-                  },
-                  child: bottomMenuItem(
-                      "Desktop Mode", Icons.desktop_mac_rounded)),
-              TextButton(
-                  onPressed: () {
-                    Get.offAndToNamed('/earning/dashboard');
-                  },
-                  child:
-                      bottomMenuItem("Earnings", CupertinoIcons.money_dollar)),
-              TextButton(
-                  onPressed: () {
-                    Get.offAndToNamed('/history/download');
-                  },
-                  child: bottomMenuItem(
-                      "Downloads", CupertinoIcons.cloud_download_fill)),
-              TextButton(
-                  onPressed: () {
-                    var browserModel =
-                        Provider.of<BrowserModel>(context, listen: false);
-                    var webViewModel =
-                        browserModel.getCurrentTab()?.webViewModel;
-                    var url = webViewModel?.url;
-                    if (url != null) {
-                      Share.share(url.toString(), subject: webViewModel?.title);
-                    }
-                  },
-                  child: bottomMenuItem("Share", Icons.share_outlined)),
-              TextButton(
-                  onPressed: () {
-                    Get.offAndToNamed('/history/browsing');
-                  },
-                  child: bottomMenuItem("History", Icons.history)),
-              TextButton(
-                  onPressed: () {
-                    Get.offAndToNamed('/setting/account');
-                  },
-                  child: bottomMenuItem(
-                      "Account Settngs", Icons.settings_rounded)),
-              TextButton(
-                  onPressed: () {
-                    // Get.offAndToNamed('/setting/account');
-                  },
-                  child: bottomMenuItem("Settngs", CupertinoIcons.settings))
-            ],
-          ),
-        ),
-        Container(
-          child: Stack(
-            children: [
-              Align(
-                alignment: Alignment.center,
-                child: IconButton(
-                    onPressed: () {
-                      Get.back();
-                    },
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: UIColors.primaryDarkColor,
-                      size: 50,
-                    )),
-              ),
-              Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                      onPressed: () {
-                        LocalData().logOut();
+                    child: InkWell(
+                      onTap: () {
+                        if (userData == null) {
+                          Get.toNamed('/auth/start');
+                        }
                       },
-                      icon: Icon(
-                        Icons.logout,
-                        color: UIColors.primaryDarkColor,
-                        size: 20,
-                      )))
-            ],
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            userData != null
+                                ? userData!.name!
+                                : "Not Signed in",
+                            style: TextStyle(
+                                color: UIColors.blackColor, fontSize: 12.sp),
+                          ),
+                          Text(
+                            userData != null
+                                ? userData!.email!
+                                : "Sign in to sync your browsing data and coin.",
+                            style: TextStyle(
+                                color: UIColors.blackColor, fontSize: 10.sp),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // SizedBox(
+                  //   width: 10,
+                  // ),
+                  // Icon(
+                  //   Icons.arrow_forward_ios_rounded,
+                  //   size: 35,
+                  //   color: UIColors.primaryDarkColor,
+                  // )
+                ],
+              )),
+          // Container(
+          //   width: Get.width,
+          //   padding: EdgeInsets.all(10),
+          //   margin: EdgeInsets.fromLTRB(3, 0, 3, 0),
+          //   decoration: BoxDecoration(
+          //     border: Border.all(color: Colors.grey.withOpacity(.3), width: 1),
+          //     borderRadius: BorderRadius.circular(10),
+          //   ),
+          //   child: Column(
+          //     children: [
+          //       Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //         children: [
+          //           Text(
+          //             "Privacy Report",
+          //             style: TextStyle(color: Colors.grey),
+          //           ),
+          //           // Text(
+          //           //   "Details",
+          //           //   style: TextStyle(color: UIColors.primaryDarkColor),
+          //           // )
+          //         ],
+          //       ),
+          //       SizedBox(
+          //         height: 10,
+          //       ),
+          //       Row(
+          //         children: [
+          //           Expanded(
+          //               child: Row(
+          //             children: [
+          //               Image.asset('assets/images/dashboard_icon_07.png'),
+          //               SizedBox(
+          //                 width: 5,
+          //               ),
+          //               Column(
+          //                 mainAxisAlignment: MainAxisAlignment.center,
+          //                 crossAxisAlignment: CrossAxisAlignment.start,
+          //                 children: [
+          //                   Text(
+          //                     "500 Ads",
+          //                     style:
+          //                         TextStyle(color: Colors.grey, fontSize: 9.sp),
+          //                   ),
+          //                   Text(
+          //                     "Blocked",
+          //                     style:
+          //                         TextStyle(color: Colors.grey, fontSize: 9.sp),
+          //                   )
+          //                 ],
+          //               )
+          //             ],
+          //           )),
+          //           SizedBox(
+          //             width: 10,
+          //           ),
+          //           Expanded(
+          //               child: Row(
+          //             children: [
+          //               Image.asset('assets/images/dashboard_icon_08.png'),
+          //               SizedBox(
+          //                 width: 5,
+          //               ),
+          //               Column(
+          //                 mainAxisAlignment: MainAxisAlignment.center,
+          //                 crossAxisAlignment: CrossAxisAlignment.start,
+          //                 children: [
+          //                   Text(
+          //                     "50.00 Mb",
+          //                     style:
+          //                         TextStyle(color: Colors.grey, fontSize: 9.sp),
+          //                   ),
+          //                   Text(
+          //                     "Saved",
+          //                     style:
+          //                         TextStyle(color: Colors.grey, fontSize: 9.sp),
+          //                   )
+          //                 ],
+          //               )
+          //             ],
+          //           )),
+          //           SizedBox(
+          //             width: 10,
+          //           ),
+          //           Expanded(
+          //               child: Row(
+          //             children: [
+          //               Image.asset('assets/images/dashboard_icon_09.png'),
+          //               SizedBox(
+          //                 width: 5,
+          //               ),
+          //               Column(
+          //                 mainAxisAlignment: MainAxisAlignment.center,
+          //                 crossAxisAlignment: CrossAxisAlignment.start,
+          //                 children: [
+          //                   Text(
+          //                     "50 Min",
+          //                     style:
+          //                         TextStyle(color: Colors.grey, fontSize: 9.sp),
+          //                   ),
+          //                   Text(
+          //                     "Served",
+          //                     style:
+          //                         TextStyle(color: Colors.grey, fontSize: 9.sp),
+          //                   )
+          //                 ],
+          //               )
+          //             ],
+          //           )),
+          //         ],
+          //       )
+          //     ],
+          //   ),
+          // ),
+          if (userData != null)
+            Container(
+              width: Get.width,
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: UIColors.backgroundColor.withOpacity(.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Earning Report",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      // Text(
+                      //   "Details",
+                      //   style:
+                      //       TextStyle(color: UIColors.primaryDarkColor),
+                      // )
+                    ],
+                  ),
+                  if (userData != null)
+                    SizedBox(
+                      height: 10,
+                    ),
+                  if (userData != null)
+                    Container(
+                      height: 50,
+                      child: Row(
+                        children: [
+                          // Expanded(
+                          //     child: Row(
+                          //   children: [
+                          //     Image.asset(
+                          //         'assets/images/dashboard_icon_07.png'),
+                          //     SizedBox(
+                          //       width: 5,
+                          //     ),
+                          //     Column(
+                          //       mainAxisAlignment: MainAxisAlignment.center,
+                          //       crossAxisAlignment:
+                          //           CrossAxisAlignment.start,
+                          //       children: [
+                          //         Text(
+                          //           "500 Coins",
+                          //           style: TextStyle(
+                          //               color: Colors.grey, fontSize: 8.sp),
+                          //         ),
+                          //         Text(
+                          //           "Earned",
+                          //           style: TextStyle(
+                          //               color: Colors.grey, fontSize: 8.sp),
+                          //         )
+                          //       ],
+                          //     )
+                          //   ],
+                          // )),
+                          // SizedBox(
+                          //   width: 10,
+                          // ),
+                          Expanded(
+                              child: Row(
+                            children: [
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: Image.asset(
+                                  'assets/images/dashboard_icon_08.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${userData!.totalMinuteServed} Min",
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 14.sp),
+                                    ),
+                                    Text(
+                                      "Served",
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 12.sp),
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
+                          )),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                              child: Row(
+                            children: [
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: Image.asset(
+                                  'assets/images/dashboard_icon_09.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${userData!.totalAdsViewed} Ads",
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 14.sp),
+                                    ),
+                                    Text(
+                                      "Viewed",
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 12.sp),
+                                    )
+                                  ],
+                                ),
+                              )
+                            ],
+                          )),
+                        ],
+                      ),
+                    )
+                ],
+              ),
+            ),
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+            child: GridView.count(
+              physics: BouncingScrollPhysics(),
+              crossAxisCount: 4,
+              childAspectRatio: .9,
+              shrinkWrap: true,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      if (LocalData().checkUserLogin()) {
+                        Get.offAndToNamed('/bookmarks');
+                      } else {
+                        Get.back();
+                        loginNotifyDialog();
+                      }
+                    },
+                    child: bottomMenuItem("Bookmarks", Icons.bookmarks)),
+                TextButton(
+                    onPressed: () async {
+                      if (_webViewController != null) {
+                        webViewModel?.isDesktopMode =
+                            !webViewModel.isDesktopMode;
+                        currentWebViewModel.isDesktopMode =
+                            webViewModel?.isDesktopMode ?? false;
+
+                        await _webViewController.setOptions(
+                            options: InAppWebViewGroupOptions(
+                                crossPlatform: InAppWebViewOptions(
+                                    preferredContentMode:
+                                        webViewModel?.isDesktopMode ?? false
+                                            ? UserPreferredContentMode.DESKTOP
+                                            : UserPreferredContentMode
+                                                .RECOMMENDED)));
+                        await _webViewController.reload();
+                        Get.back();
+                      }
+                    },
+                    child: bottomMenuItem(
+                        "${webViewModel!.isDesktopMode ? "Desktop" : "Mobile"} Mode",
+                        webViewModel.isDesktopMode
+                            ? Icons.desktop_mac_rounded
+                            : Icons.phone_android)),
+                TextButton(
+                    onPressed: () {
+                      if (LocalData().checkUserLogin()) {
+                        Get.offAndToNamed('/earning/dashboard');
+                      } else {
+                        Get.back();
+                        loginNotifyDialog();
+                      }
+                    },
+                    child: bottomMenuItem(
+                        "Earnings", CupertinoIcons.money_dollar)),
+                TextButton(
+                    onPressed: () {
+                      Get.offAndToNamed('/history/download');
+                    },
+                    child: bottomMenuItem(
+                        "Downloads", CupertinoIcons.cloud_download_fill)),
+                TextButton(
+                    onPressed: () {
+                      var browserModel =
+                          Provider.of<BrowserModel>(context, listen: false);
+                      var webViewModel =
+                          browserModel.getCurrentTab()?.webViewModel;
+                      var url = webViewModel?.url;
+                      if (url != null) {
+                        Share.share(url.toString(),
+                            subject: webViewModel?.title);
+                      }
+                    },
+                    child: bottomMenuItem("Share", Icons.share_outlined)),
+                TextButton(
+                    onPressed: () {
+                      Get.offAndToNamed('/history/browsing');
+                    },
+                    child: bottomMenuItem("History", Icons.history)),
+                TextButton(
+                    onPressed: () {
+                      if (LocalData().checkUserLogin()) {
+                        Get.offAndToNamed('/setting/account');
+                      } else {
+                        Get.back();
+                        loginNotifyDialog();
+                      }
+                    },
+                    child: bottomMenuItem(
+                        "Account Settngs", Icons.settings_rounded)),
+                TextButton(
+                    onPressed: () {
+                      if (LocalData().checkUserLogin()) {
+                        LocalData().logOut();
+                      } else {
+                        Get.back();
+                        loginNotifyDialog();
+                      }
+                    },
+                    child: bottomMenuItem("Logout", Icons.logout))
+              ],
+            ),
           ),
-        )
-      ],
+          // Container(
+          //   child: Stack(
+          //     children: [
+          //       Align(
+          //         alignment: Alignment.center,
+          //         child: IconButton(
+          //             onPressed: () {
+          //               Get.back();
+          //             },
+          //             icon: Icon(
+          //               Icons.keyboard_arrow_down,
+          //               color: UIColors.primaryDarkColor,
+          //               size: 50,
+          //             )),
+          //       ),
+          //       Align(
+          //           alignment: Alignment.centerRight,
+          //           child: IconButton(
+          //               onPressed: () {
+          //                 LocalData().logOut();
+          //               },
+          //               icon: Icon(
+          //                 Icons.logout,
+          //                 color: UIColors.primaryDarkColor,
+          //                 size: 20,
+          //               )))
+          //     ],
+          //   ),
+          // )
+        ],
+      ),
     );
   }
 
@@ -846,6 +1032,8 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
           ? Uri.parse(settings.customUrlHomePage)
           : Uri.parse(settings.searchEngine.url);
     }
+
+    // browserModel.addTab(EmptyTab());
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),

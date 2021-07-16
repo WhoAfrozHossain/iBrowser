@@ -1,9 +1,11 @@
+import 'package:app_review/app_review.dart';
 import 'package:best_browser/PoJo/UserModel.dart';
 import 'package:best_browser/Service/Network.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:share/share.dart';
 import 'package:sizer/sizer.dart';
 
 class EarningDashboard extends StatefulWidget {
@@ -14,15 +16,30 @@ class EarningDashboard extends StatefulWidget {
 class _EarningDashboardState extends State<EarningDashboard> {
   UserModel? userData;
 
+  String? appID = "";
+  String? output = "";
+  String? appVersion = "";
+
   @override
   void initState() {
+    getUserData();
+
+    AppReview.getPackageInfo().then((onValue) {
+      setState(() {
+        appID = onValue!.packageName;
+        appVersion = onValue.version;
+      });
+    });
+
+    super.initState();
+  }
+
+  getUserData() {
     Network().getUserData().then((value) {
       setState(() {
         userData = value;
       });
     });
-
-    super.initState();
   }
 
   @override
@@ -133,7 +150,8 @@ class _EarningDashboardState extends State<EarningDashboard> {
                                     borderRadius: BorderRadius.circular(200.0),
                                   ))),
                               onPressed: () {
-                                // Get.toNamed('/auth/start');
+                                Get.toNamed('/withdraw')!
+                                    .then((value) => getUserData());
                               },
                               child: Text(
                                 "Withdraw",
@@ -147,7 +165,9 @@ class _EarningDashboardState extends State<EarningDashboard> {
                     ),
                     InkWell(
                       onTap: () {
-                        Get.toNamed('/ads/browse');
+                        Get.toNamed('/ads/browse')!.then((value) {
+                          getUserData();
+                        });
                       },
                       child: Container(
                         width: Get.width,
@@ -388,7 +408,13 @@ class _EarningDashboardState extends State<EarningDashboard> {
                       height: 10,
                     ),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        AppReview.storeListing.then((onValue) {
+                          setState(() {
+                            output = onValue;
+                          });
+                        });
+                      },
                       child: Container(
                         width: Get.width,
                         padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
@@ -482,7 +508,11 @@ class _EarningDashboardState extends State<EarningDashboard> {
                     // ),
                     Divider(),
                     InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        Share.share(
+                            "https://play.google.com/store/apps/details?id=$appID",
+                            subject: "iBrowser");
+                      },
                       child: Container(
                         width: Get.width,
                         padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
