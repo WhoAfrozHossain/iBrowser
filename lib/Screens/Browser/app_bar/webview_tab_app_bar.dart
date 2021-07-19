@@ -1,10 +1,10 @@
 import 'dart:io';
 
-// import 'package:cached_network_image/cached_network_image.dart';
 import 'package:best_browser/Screens/Browser/app_bar/url_info_popup.dart';
 import 'package:best_browser/Screens/Browser/custom_image.dart';
 import 'package:best_browser/Screens/Browser/models/browser_model.dart';
 import 'package:best_browser/Screens/Browser/models/favorite_model.dart';
+import 'package:best_browser/Screens/Browser/models/search_engine_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/pages/developers/main.dart';
 import 'package:best_browser/Screens/Browser/pages/settings/main.dart';
@@ -69,16 +69,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             (await _webViewController?.getUrl())?.toString() ?? "";
       }
     });
-
-    // _searchController!.addListener(() {
-    //   final newText = _searchController!.text.toLowerCase();
-    //   _searchController!.value = _searchController!.value.copyWith(
-    //     text: newText,
-    //     selection: TextSelection(
-    //         baseOffset: newText.length, extentOffset: newText.length),
-    //     composing: TextRange.empty,
-    //   );
-    // });
   }
 
   @override
@@ -92,6 +82,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
   @override
   Widget build(BuildContext context) {
+    Widget? leading = _buildAppBarHomePageWidget();
     return Selector<WebViewModel, Uri?>(
         selector: (context, webViewModel) => webViewModel.url,
         builder: (context, url, child) {
@@ -102,12 +93,10 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
             _searchController?.text = url.toString();
           }
 
-          Widget? leading = _buildAppBarHomePageWidget();
-
           return Selector<WebViewModel, bool>(
               selector: (context, webViewModel) => webViewModel.isIncognitoMode,
               builder: (context, isIncognitoMode, child) {
-                return /*leading != null
+                return leading != null
                     ? AppBar(
                         backgroundColor:
                             isIncognitoMode ? Colors.black87 : Colors.blue,
@@ -116,15 +105,14 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         title: _buildSearchTextField(),
                         actions: _buildActionsMenu(),
                       )
-                    : */
-                    AppBar(
-                  automaticallyImplyLeading: false,
-                  backgroundColor:
-                      isIncognitoMode ? Colors.black87 : Colors.blue,
-                  titleSpacing: 10.0,
-                  title: _buildSearchTextField(),
-                  actions: _buildActionsMenu(),
-                );
+                    : AppBar(
+                        automaticallyImplyLeading: false,
+                        backgroundColor:
+                            isIncognitoMode ? Colors.black87 : Colors.blue,
+                        titleSpacing: 10.0,
+                        title: _buildSearchTextField(),
+                        actions: _buildActionsMenu(),
+                      );
               });
         });
   }
@@ -168,10 +156,19 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       child: Stack(
         children: <Widget>[
           TextField(
+            onTap: () {
+              final newText = _searchController!.text.toLowerCase();
+              _searchController!.value = _searchController!.value.copyWith(
+                text: newText,
+                selection: TextSelection(
+                    baseOffset: newText.length, extentOffset: newText.length),
+                composing: TextRange.empty,
+              );
+            },
             onSubmitted: (value) {
               var url = Uri.parse(value.trim());
 
-              print(url.scheme);
+              // print(url.scheme);
 
               if (!value.contains(".")) {
                 url = Uri.parse(settings.searchEngine.searchUrl + value);
@@ -237,14 +234,18 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   }*/
                 }
 
-                return Icon(
-                  icon,
-                  color: isSecure ? Colors.green : Colors.grey,
-                );
+                return Image.asset(settings.searchEngine.assetIcon);
+
+                // return Icon(
+                //   icon,
+                //   color: isSecure ? Colors.green : Colors.grey,
+                // );
               },
             ),
             onPressed: () {
               // showUrlInfo();
+
+              showSearchEngineDialog(webViewModel, browserModel);
             },
           ),
         ],
@@ -975,6 +976,68 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       : UserPreferredContentMode.RECOMMENDED)));
       await _webViewController.reload();
     }
+  }
+
+  void showSearchEngineDialog(var webViewModel, var browserModel) {
+    var settings = browserModel.getSettings();
+
+    var url = webViewModel.url;
+    if (url == null || url.toString().isEmpty) {
+      return;
+    }
+
+    route = CustomPopupDialog.show(
+      context: context,
+      transitionDuration: customPopupDialogTransitionDuration,
+      builder: (context) {
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: SearchEngines.length,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Container(
+                  width: 30,
+                  child: Center(
+                      child: Image.asset(SearchEngines[index].assetIcon))),
+              horizontalTitleGap: 10,
+              title: Text(SearchEngines[index].name),
+              subtitle: Text(SearchEngines[index].url),
+              onTap: () {
+                setState(() {
+                  settings.searchEngine = SearchEngines[index];
+
+                  browserModel.updateSettings(settings);
+                });
+                Get.back();
+              },
+            );
+          },
+        );
+        // return ListTile(
+        //   title: const Text("Search Engine"),
+        //   subtitle: Text(settings.searchEngine.name),
+        //   trailing: DropdownButton<SearchEngineModel>(
+        //     hint: Text("Search Engine"),
+        //     onChanged: (value) {
+        //       setState(() {
+        //         if (value != null) {
+        //           settings.searchEngine = value;
+        //         }
+        //         browserModel.updateSettings(settings);
+        //       });
+        //     },
+        //     value: settings.searchEngine,
+        //     items: SearchEngines.map((searchEngine) {
+        //       return DropdownMenuItem(
+        //         value: searchEngine,
+        //         child: Text(searchEngine.name),
+        //       );
+        //     }).toList(),
+        //   ),
+        // );
+      },
+    );
   }
 
   void showUrlInfo() {

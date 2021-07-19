@@ -16,7 +16,6 @@ import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'javascript_console_result.dart';
 import 'long_press_alert_dialog.dart';
@@ -136,6 +135,20 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     );
   }
 
+  List<String> blockUrls = [
+    'googleadservices.com',
+    'doubleclick.net',
+    'haunigre.net',
+    'pesoaniz.com',
+    'googletagmanager.com',
+    'naucaish.net',
+    'jighucme.com',
+    'zpujlrylfvk.com',
+    'mxtzwvylpjcoq.com',
+    'sorryfearknockout.com',
+    'visariomedia.com'
+  ];
+
   InAppWebView _buildWebView() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
@@ -149,17 +162,24 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     var initialOptions = widget.webViewModel.options!;
     initialOptions.crossPlatform.useOnDownloadStart = true;
     initialOptions.crossPlatform.useOnLoadResource = true;
-    initialOptions.crossPlatform.useShouldOverrideUrlLoading = true;
+    // initialOptions.crossPlatform.useShouldOverrideUrlLoading = true;
     initialOptions.crossPlatform.javaScriptCanOpenWindowsAutomatically = true;
     initialOptions.crossPlatform.userAgent =
         "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
     initialOptions.crossPlatform.transparentBackground = true;
-    initialOptions.crossPlatform.contentBlockers = [
-      ContentBlocker(
-          trigger: ContentBlockerTrigger(urlFilter: 'admob.com'),
-          action: ContentBlockerAction(type: ContentBlockerActionType.BLOCK))
-    ];
+    // initialOptions.crossPlatform.contentBlockers = [
+    //   ContentBlocker(
+    //       trigger: ContentBlockerTrigger(urlFilter: ".*", resourceType: const [
+    //         ContentBlockerTriggerResourceType.IMAGE,
+    //         ContentBlockerTriggerResourceType.SCRIPT,
+    //         ContentBlockerTriggerResourceType.STYLE_SHEET,
+    //       ], ifDomain: [
+    //         "doubleclick.net",
+    //       ]),
+    //       action: ContentBlockerAction(type: ContentBlockerActionType.BLOCK))
+    // ];
 
+    initialOptions.android.useShouldInterceptRequest = true;
     initialOptions.android.safeBrowsingEnabled = true;
     initialOptions.android.disableDefaultErrorPage = true;
     initialOptions.android.supportMultipleWindows = true;
@@ -178,7 +198,48 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     return InAppWebView(
       initialUrlRequest: URLRequest(url: widget.webViewModel.url),
       initialOptions: initialOptions,
+      shouldOverrideUrlLoading: (
+        controller,
+        NavigationAction shouldOverrideUrlLoadingRequest,
+      ) async {
+        print('shouldOverrideUrlLoading: $shouldOverrideUrlLoadingRequest');
+        return null;
+      },
+      androidShouldInterceptRequest: (
+        controller,
+        WebResourceRequest request,
+      ) async {
+        String currentUrl = request.url.toString();
+        bool isAd = false;
+        for (int i = 0; i < blockUrls.length; i++) {
+          if (currentUrl.contains(blockUrls[i])) {
+            isAd = true;
+          }
+        }
+
+        WebResourceResponse response = WebResourceResponse();
+
+        if (isAd) {
+          return response;
+        } else {
+          return null;
+        }
+      },
+
       windowId: widget.webViewModel.windowId,
+      // value: (InAppWebViewController controller,
+      //     ShouldOverrideUrlLoadingRequest
+      //         shouldOverrideUrlLoadingRequest) async {
+      //   if (Platform.isAndroid ||
+      //       shouldOverrideUrlLoadingRequest.iosWKNavigationType ==
+      //           IOSWKNavigationType.LINK_ACTIVATED) {
+      //     await controller.loadUrl(
+      //         url: shouldOverrideUrlLoadingRequest.url,
+      //         headers: {"custom-header": "value"});
+      //     return ShouldOverrideUrlLoadingAction.CANCEL;
+      //   }
+      //   return ShouldOverrideUrlLoadingAction.ALLOW;
+      // },
       onWebViewCreated: (controller) async {
         initialOptions.crossPlatform.transparentBackground = false;
         await controller.setOptions(options: initialOptions);
@@ -352,24 +413,24 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           currentWebViewModel.updateWithValue(widget.webViewModel);
         }
       },
-      shouldOverrideUrlLoading: (controller, navigationAction) async {
-        var url = navigationAction.request.url;
-
-        if (url != null &&
-            !["https", "http", "file", "chrome", "data", "javascript", "about"]
-                .contains(url.scheme)) {
-          if (await canLaunch(url.toString())) {
-            // Launch the App
-            await launch(
-              url.toString(),
-            );
-            // and cancel the request
-            return NavigationActionPolicy.CANCEL;
-          }
-        }
-
-        return NavigationActionPolicy.ALLOW;
-      },
+      // shouldOverrideUrlLoading: (controller, navigationAction) async {
+      //   var url = navigationAction.request.url;
+      //
+      //   if (url != null &&
+      //       !["https", "http", "file", "chrome", "data", "javascript", "about"]
+      //           .contains(url.scheme)) {
+      //     if (await canLaunch(url.toString())) {
+      //       // Launch the App
+      //       await launch(
+      //         url.toString(),
+      //       );
+      //       // and cancel the request
+      //       return NavigationActionPolicy.CANCEL;
+      //     }
+      //   }
+      //
+      //   return NavigationActionPolicy.CANCEL;
+      // },
       onDownloadStart: (controller, url) async {
         if (await Permission.storage.request().isGranted) {
           Directory? downloadPath =
@@ -567,5 +628,11 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
 
   void onHideTab() async {
     this.pause();
+  }
+
+  @override
+  Future<NavigationActionPolicy> shouldOverrideUrlLoading(
+      NavigationActionPolicy shouldOverrideUrlLoadingRequest) async {
+    return NavigationActionPolicy.CANCEL;
   }
 }

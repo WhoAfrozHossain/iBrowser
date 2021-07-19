@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_review/app_review.dart';
 import 'package:best_browser/Controller/Controller.dart';
 import 'package:best_browser/Dialog/LoginDialog.dart';
 import 'package:best_browser/PoJo/UserModel.dart';
@@ -44,14 +45,27 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
 
   UserModel? userData;
 
+  String? appID = "";
+  String? output = "";
+  String? appVersion = "";
+
   @override
   void initState() {
     super.initState();
     myController.clear();
 
+
+
     Network().getUserData().then((value) {
       setState(() {
         userData = value;
+      });
+    });
+
+    AppReview.getPackageInfo().then((onValue) {
+      setState(() {
+        appID = onValue!.packageName;
+        appVersion = onValue.version;
       });
     });
 
@@ -880,31 +894,32 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                       }
                     },
                     child: bottomMenuItem("Bookmarks", Icons.bookmarks)),
-                TextButton(
-                    onPressed: () async {
-                      if (_webViewController != null) {
-                        webViewModel?.isDesktopMode =
-                            !webViewModel.isDesktopMode;
-                        currentWebViewModel.isDesktopMode =
-                            webViewModel?.isDesktopMode ?? false;
+                if (browserModel.webViewTabs.length > 0)
+                  TextButton(
+                      onPressed: () async {
+                        if (_webViewController != null) {
+                          webViewModel?.isDesktopMode =
+                              !webViewModel.isDesktopMode;
+                          currentWebViewModel.isDesktopMode =
+                              webViewModel?.isDesktopMode ?? false;
 
-                        await _webViewController.setOptions(
-                            options: InAppWebViewGroupOptions(
-                                crossPlatform: InAppWebViewOptions(
-                                    preferredContentMode:
-                                        webViewModel?.isDesktopMode ?? false
-                                            ? UserPreferredContentMode.DESKTOP
-                                            : UserPreferredContentMode
-                                                .RECOMMENDED)));
-                        await _webViewController.reload();
-                        Get.back();
-                      }
-                    },
-                    child: bottomMenuItem(
-                        "${webViewModel!.isDesktopMode ? "Desktop" : "Mobile"} Mode",
-                        webViewModel.isDesktopMode
-                            ? Icons.desktop_mac_rounded
-                            : Icons.phone_android)),
+                          await _webViewController.setOptions(
+                              options: InAppWebViewGroupOptions(
+                                  crossPlatform: InAppWebViewOptions(
+                                      preferredContentMode:
+                                          webViewModel?.isDesktopMode ?? false
+                                              ? UserPreferredContentMode.DESKTOP
+                                              : UserPreferredContentMode
+                                                  .RECOMMENDED)));
+                          await _webViewController.reload();
+                          Get.back();
+                        }
+                      },
+                      child: bottomMenuItem(
+                          "${webViewModel!.isDesktopMode ? "Desktop" : "Mobile"} Mode",
+                          webViewModel.isDesktopMode
+                              ? Icons.desktop_mac_rounded
+                              : Icons.phone_android)),
                 TextButton(
                     onPressed: () {
                       if (LocalData().checkUserLogin()) {
@@ -924,15 +939,10 @@ class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
                         "Downloads", CupertinoIcons.cloud_download_fill)),
                 TextButton(
                     onPressed: () {
-                      var browserModel =
-                          Provider.of<BrowserModel>(context, listen: false);
-                      var webViewModel =
-                          browserModel.getCurrentTab()?.webViewModel;
-                      var url = webViewModel?.url;
-                      if (url != null) {
-                        Share.share(url.toString(),
-                            subject: webViewModel?.title);
-                      }
+                      Get.back();
+                      Share.share(
+                          "https://play.google.com/store/apps/details?id=$appID",
+                          subject: "iBrowser");
                     },
                     child: bottomMenuItem("Share", Icons.share_outlined)),
                 TextButton(

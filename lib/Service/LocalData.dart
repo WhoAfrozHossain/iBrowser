@@ -14,8 +14,11 @@ class LocalData {
       //   url = '/setup/city';
     } else if (localData.read('interest') == null) {
       url = '/interest';
-    } else if (localData.read('login') == null || !localData.read('login')) {
-      url = '/auth/start';
+      // } else if (localData.read('login') == null || !localData.read('login')) {
+      //   url = '/auth/start';
+    } else if (localData.read('country') == null ||
+        localData.read('city') == null) {
+      url = '/setup/city';
     } else {
       url = '/browser';
     }
@@ -35,7 +38,8 @@ class LocalData {
   void saveCountryAndCity(String countryId, String cityId) {
     localData.write('country', countryId);
     localData.write('city', cityId);
-    Get.toNamed('/auth/register');
+    // Get.toNamed('/auth/register');
+    checkLocalData();
   }
 
   void storeLoginUserData(var data, bool isSkip) {
@@ -63,5 +67,14 @@ class LocalData {
     localData.write('login', false);
     localData.write('userId', '');
     checkLocalData();
+  }
+
+  void writeDefaultSearchEngine(int index) {
+    localData.write('searchEngine', index);
+  }
+
+  int readDefaultSearchEngine() {
+    String? value = localData.read('searchEngine');
+    return value == null ? 0 : int.parse(value);
   }
 }
