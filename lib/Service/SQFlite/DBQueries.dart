@@ -23,7 +23,9 @@ class DBQueries {
   Future<List<HistoryModel>> getHistory() async {
     List<HistoryModel> history = [];
     final allRows = await dbHelper.queryAllRows();
+    print(allRows);
     allRows.forEach((row) {
+      print(row);
       HistoryModel model = new HistoryModel(
           id: row[DatabaseHelper.columnHistoryId],
           title: row[DatabaseHelper.columnHistoryTitle],

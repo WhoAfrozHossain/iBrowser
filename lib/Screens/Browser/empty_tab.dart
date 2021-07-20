@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:best_browser/Controller/Controller.dart';
 import 'package:best_browser/PoJo/NewsModel.dart';
+import 'package:best_browser/Screens/Browser/app_bar/global_widget.dart';
 import 'package:best_browser/Screens/Browser/models/browser_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:best_browser/Service/Network.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class _EmptyTabState extends State<EmptyTab> {
   @override
   void initState() {
     _timer = Timer.periodic(Duration.zero, (timer) {
-      setState(() {});
+      if (mounted) setState(() {});
     });
     super.initState();
   }
@@ -81,14 +82,17 @@ class _EmptyTabState extends State<EmptyTab> {
                             children: [
                               AspectRatio(
                                 aspectRatio: 1,
-                                child: CachedNetworkImage(
-                                  imageUrl: Network().rootUrl +
-                                      "images/" +
-                                      myController.specialSites[index].icon!,
-                                  placeholder: (context, url) =>
-                                      CupertinoActivityIndicator(),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                                  child: CachedNetworkImage(
+                                    imageUrl: Network().rootUrl +
+                                        "images/" +
+                                        myController.specialSites[index].icon!,
+                                    placeholder: (context, url) =>
+                                        CupertinoActivityIndicator(),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  ),
                                 ),
                               ),
                               Text(
@@ -136,13 +140,31 @@ class _EmptyTabState extends State<EmptyTab> {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
-    browserModel.addTab(WebViewTab(
-      key: GlobalKey(),
-      webViewModel: WebViewModel(
-          url: Uri.parse(value!.contains(".")
-              ? value
-              : settings.searchEngine.searchUrl + value)),
-    ));
+    var webViewModel = Provider.of<WebViewModel>(context, listen: false);
+    var _webViewController = webViewModel.webViewController;
+
+    var url = Uri.parse(value!.trim());
+
+    // print(url.scheme);
+
+    if (!value.contains(".")) {
+      url = Uri.parse(settings.searchEngine.searchUrl + value);
+    } else {
+      if (!value.contains("www.") && !value.startsWith("http")) {
+        value = "www." + value;
+      }
+      if (!value.startsWith("http")) {
+        value = "https://" + value;
+      }
+    }
+    url = Uri.parse(value);
+
+    if (_webViewController != null) {
+      _webViewController.loadUrl(urlRequest: URLRequest(url: url));
+    } else {
+      addNewTab(context, url: url);
+      webViewModel.url = url;
+    }
   }
 
   newsItem(NewsModel item) {
@@ -199,7 +221,7 @@ class _EmptyTabState extends State<EmptyTab> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500),
+                                fontSize: 17, fontWeight: FontWeight.w500),
                             textAlign: TextAlign.left,
                           ),
                         ),
@@ -208,7 +230,7 @@ class _EmptyTabState extends State<EmptyTab> {
                             item.description!,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 15),
+                            style: TextStyle(fontSize: 13),
                             textAlign: TextAlign.justify,
                           ),
                         )

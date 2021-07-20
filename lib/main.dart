@@ -10,6 +10,7 @@ import 'package:best_browser/Screens/Auth/RecoverAccount.dart';
 import 'package:best_browser/Screens/Auth/Register.dart';
 import 'package:best_browser/Screens/Auth/SetPassword.dart';
 import 'package:best_browser/Screens/Bookmark/Bookmark.dart';
+import 'package:best_browser/Screens/Browser/app_bar/url_search_page.dart';
 import 'package:best_browser/Screens/Browser/browser.dart';
 import 'package:best_browser/Screens/Browser/models/browser_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
@@ -167,6 +168,10 @@ void main() async {
             name: '/browser',
             page: () => Browser(),
           ),
+          GetPage(
+              name: '/url/search',
+              page: () => UrlSearch(),
+              transition: Transition.upToDown),
           GetPage(
             name: '/intro/1',
             page: () => IntroPageFirst(),

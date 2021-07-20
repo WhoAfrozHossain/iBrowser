@@ -1,4 +1,3 @@
-import 'package:best_browser/Service/LocalData.dart';
 import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -92,7 +91,7 @@ class _GettingStartedState extends State<GettingStarted> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            Get.toNamed('/setup/city');
+                            Get.toNamed('/auth/register');
                           },
                           child: Text(
                             "Register Now",
@@ -104,32 +103,32 @@ class _GettingStartedState extends State<GettingStarted> {
                         )
                       ],
                     ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't want to login now? ",
-                          style:
-                              TextStyle(color: Colors.white, fontSize: 11.sp),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            LocalData().storeLoginUserData(null, true);
-                          },
-                          child: Text(
-                            "Skip",
-                            style: TextStyle(
-                                color: UIColors.buttonColor,
-                                decoration: TextDecoration.underline,
-                                fontSize: 13.sp),
-                          ),
-                        )
-                      ],
-                    )
+                    // SizedBox(
+                    //   height: 10,
+                    // ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   crossAxisAlignment: CrossAxisAlignment.center,
+                    //   children: [
+                    //     Text(
+                    //       "Don't want to login now? ",
+                    //       style:
+                    //           TextStyle(color: Colors.white, fontSize: 11.sp),
+                    //     ),
+                    //     GestureDetector(
+                    //       onTap: () {
+                    //         LocalData().storeLoginUserData(null, true);
+                    //       },
+                    //       child: Text(
+                    //         "Skip",
+                    //         style: TextStyle(
+                    //             color: UIColors.buttonColor,
+                    //             decoration: TextDecoration.underline,
+                    //             fontSize: 13.sp),
+                    //       ),
+                    //     )
+                    //   ],
+                    // )
                   ],
                 ),
               ),

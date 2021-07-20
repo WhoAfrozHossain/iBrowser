@@ -4,14 +4,12 @@ import 'package:best_browser/Screens/Browser/app_bar/url_info_popup.dart';
 import 'package:best_browser/Screens/Browser/custom_image.dart';
 import 'package:best_browser/Screens/Browser/models/browser_model.dart';
 import 'package:best_browser/Screens/Browser/models/favorite_model.dart';
-import 'package:best_browser/Screens/Browser/models/search_engine_model.dart';
 import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:best_browser/Screens/Browser/pages/developers/main.dart';
 import 'package:best_browser/Screens/Browser/pages/settings/main.dart';
 import 'package:best_browser/Service/Network.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
@@ -24,6 +22,7 @@ import '../custom_popup_menu_item.dart';
 import '../popup_menu_actions.dart';
 import '../project_info_popup.dart';
 import '../webview_tab.dart';
+import 'global_widget.dart';
 
 class WebViewTabAppBar extends StatefulWidget {
   final void Function()? showFindOnPage;
@@ -138,7 +137,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                   : Uri.parse(settings.searchEngine.url);
           _webViewController.loadUrl(urlRequest: URLRequest(url: url));
         } else {
-          addNewTab();
+          addNewTab(context);
         }
       },
     );
@@ -153,105 +152,187 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
 
     return Container(
       height: 40.0,
-      child: Stack(
-        children: <Widget>[
-          TextField(
-            onTap: () {
-              final newText = _searchController!.text.toLowerCase();
-              _searchController!.value = _searchController!.value.copyWith(
-                text: newText,
-                selection: TextSelection(
-                    baseOffset: newText.length, extentOffset: newText.length),
-                composing: TextRange.empty,
-              );
-            },
-            onSubmitted: (value) {
-              var url = Uri.parse(value.trim());
-
-              // print(url.scheme);
-
-              if (!value.contains(".")) {
-                url = Uri.parse(settings.searchEngine.searchUrl + value);
-              } else {
-                if (!value.contains("www.")) {
-                  value = "www." + value;
-                  url = Uri.parse(value);
-                }
-                if (!value.startsWith("http")) {
-                  url = Uri.parse("https://" + value);
-                }
-              }
-
-              if (_webViewController != null) {
-                _webViewController.loadUrl(urlRequest: URLRequest(url: url));
-              } else {
-                addNewTab(url: url);
-                webViewModel.url = url;
-              }
-            },
-            keyboardType: TextInputType.url,
-            focusNode: _focusNode,
-            autofocus: false,
-            controller: _searchController,
-            textInputAction: TextInputAction.go,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.only(
-                  left: 45.0, top: 10.0, right: 10.0, bottom: 10.0),
-              filled: true,
-              fillColor: Colors.white,
-              border: outlineBorder,
-              focusedBorder: outlineBorder,
-              enabledBorder: outlineBorder,
-              suffixIcon: IconButton(
-                onPressed: () {
-                  Network().createBookmark(
-                      webViewModel.title, webViewModel.url.toString());
-                },
-                icon: Icon(
-                  Icons.star,
-                  color: Colors.yellow,
-                ),
-              ),
-              hintText: "Search or type web address",
-              hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
-            ),
-            style: TextStyle(color: Colors.black, fontSize: 16.0),
-          ),
-          IconButton(
-            icon: Selector<WebViewModel, bool>(
-              selector: (context, webViewModel) => webViewModel.isSecure,
-              builder: (context, isSecure, child) {
-                var icon = Icons.info_outline;
-                if (webViewModel.isIncognitoMode) {
-                  icon = Icons.privacy_tip_rounded;
-                } else if (isSecure) {
-                  if (webViewModel.url != null &&
-                      webViewModel.url!.scheme == "file") {
-                    icon = Icons.offline_pin;
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.all(
+          const Radius.circular(50.0),
+        ),
+      ),
+      child: GestureDetector(
+        onTap: () {
+          Get.toNamed('/url/search');
+        },
+        child: Row(
+          children: [
+            IconButton(
+              icon: Selector<WebViewModel, bool>(
+                selector: (context, webViewModel) => webViewModel.isSecure,
+                builder: (context, isSecure, child) {
+                  var icon = Icons.info_outline;
+                  if (webViewModel.isIncognitoMode) {
+                    icon = Icons.privacy_tip_rounded;
+                  } else if (isSecure) {
+                    if (webViewModel.url != null &&
+                        webViewModel.url!.scheme == "file") {
+                      icon = Icons.offline_pin;
+                    }
+                    /* else {
+                icon = Icons.lock;
+              }*/
                   }
-                  /* else {
-                    icon = Icons.lock;
-                  }*/
-                }
 
-                return Image.asset(settings.searchEngine.assetIcon);
+                  return Image.asset(settings.searchEngine.assetIcon);
 
-                // return Icon(
-                //   icon,
-                //   color: isSecure ? Colors.green : Colors.grey,
-                // );
+                  // return Icon(
+                  //   icon,
+                  //   color: isSecure ? Colors.green : Colors.grey,
+                  // );
+                },
+              ),
+              onPressed: () {
+                // showUrlInfo();
+
+                showSearchEngineDialog(webViewModel, browserModel, context);
               },
             ),
-            onPressed: () {
-              // showUrlInfo();
-
-              showSearchEngineDialog(webViewModel, browserModel);
-            },
-          ),
-        ],
+            Expanded(
+              child: Text(
+                _searchController!.text.isEmpty
+                    ? "Search or type web address"
+                    : _searchController!.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    color: _searchController!.text.isEmpty
+                        ? Colors.black54
+                        : Colors.black54,
+                    fontSize: 16.0),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                Network().createBookmark(
+                    webViewModel.title, webViewModel.url.toString());
+              },
+              icon: Icon(
+                Icons.star,
+                color: Colors.yellow,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  // Widget _buildSearchTextField() {
+  //   var browserModel = Provider.of<BrowserModel>(context, listen: true);
+  //   var settings = browserModel.getSettings();
+  //
+  //   var webViewModel = Provider.of<WebViewModel>(context, listen: true);
+  //   var _webViewController = webViewModel.webViewController;
+  //
+  //   return Container(
+  //     height: 40.0,
+  //     child: Stack(
+  //       children: <Widget>[
+  //         TextField(
+  //           onTap: () {
+  //             final newText = _searchController!.text.toLowerCase();
+  //             _searchController!.value = _searchController!.value.copyWith(
+  //               text: newText,
+  //               selection: TextSelection(
+  //                   baseOffset: newText.length, extentOffset: newText.length),
+  //               composing: TextRange.empty,
+  //             );
+  //           },
+  //           onSubmitted: (value) {
+  //             var url = Uri.parse(value.trim());
+  //
+  //             // print(url.scheme);
+  //
+  //             if (!value.contains(".")) {
+  //               url = Uri.parse(settings.searchEngine.searchUrl + value);
+  //             } else {
+  //               if (!value.contains("www.")) {
+  //                 value = "www." + value;
+  //                 url = Uri.parse(value);
+  //               }
+  //               if (!value.startsWith("http")) {
+  //                 url = Uri.parse("https://" + value);
+  //               }
+  //             }
+  //
+  //             if (_webViewController != null) {
+  //               _webViewController.loadUrl(urlRequest: URLRequest(url: url));
+  //             } else {
+  //               addNewTab(context, url: url);
+  //               webViewModel.url = url;
+  //             }
+  //           },
+  //           keyboardType: TextInputType.url,
+  //           focusNode: _focusNode,
+  //           autofocus: false,
+  //           controller: _searchController,
+  //           textInputAction: TextInputAction.go,
+  //           decoration: InputDecoration(
+  //             contentPadding: const EdgeInsets.only(
+  //                 left: 45.0, top: 10.0, right: 10.0, bottom: 10.0),
+  //             filled: true,
+  //             fillColor: Colors.white,
+  //             border: outlineBorder,
+  //             focusedBorder: outlineBorder,
+  //             enabledBorder: outlineBorder,
+  //             suffixIcon: IconButton(
+  //               onPressed: () {
+  //                 Network().createBookmark(
+  //                     webViewModel.title, webViewModel.url.toString());
+  //               },
+  //               icon: Icon(
+  //                 Icons.star,
+  //                 color: Colors.yellow,
+  //               ),
+  //             ),
+  //             hintText: "Search or type web address",
+  //             hintStyle: TextStyle(color: Colors.black54, fontSize: 16.0),
+  //           ),
+  //           style: TextStyle(color: Colors.black, fontSize: 16.0),
+  //         ),
+  //         IconButton(
+  //           icon: Selector<WebViewModel, bool>(
+  //             selector: (context, webViewModel) => webViewModel.isSecure,
+  //             builder: (context, isSecure, child) {
+  //               var icon = Icons.info_outline;
+  //               if (webViewModel.isIncognitoMode) {
+  //                 icon = Icons.privacy_tip_rounded;
+  //               } else if (isSecure) {
+  //                 if (webViewModel.url != null &&
+  //                     webViewModel.url!.scheme == "file") {
+  //                   icon = Icons.offline_pin;
+  //                 }
+  //                 /* else {
+  //                   icon = Icons.lock;
+  //                 }*/
+  //               }
+  //
+  //               return Image.asset(settings.searchEngine.assetIcon);
+  //
+  //               // return Icon(
+  //               //   icon,
+  //               //   color: isSecure ? Colors.green : Colors.grey,
+  //               // );
+  //             },
+  //           ),
+  //           onPressed: () {
+  //             // showUrlInfo();
+  //
+  //             showSearchEngineDialog(webViewModel, browserModel, context);
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   List<Widget> _buildActionsMenu() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
@@ -689,7 +770,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
   void _popupMenuChoiceAction(String choice) async {
     switch (choice) {
       case PopupMenuActions.NEW_TAB:
-        addNewTab();
+        addNewTab(context);
         break;
       case PopupMenuActions.NEW_PRIVATE_TAB:
         addNewIncognitoTab();
@@ -712,22 +793,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
         toggleDesktopMode();
         break;
     }
-  }
-
-  void addNewTab({Uri? url}) {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var settings = browserModel.getSettings();
-
-    if (url == null) {
-      url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-          ? Uri.parse(settings.customUrlHomePage)
-          : Uri.parse(settings.searchEngine.url);
-    }
-
-    browserModel.addTab(WebViewTab(
-      key: GlobalKey(),
-      webViewModel: WebViewModel(url: url),
-    ));
   }
 
   void addNewIncognitoTab({Uri? url}) {
@@ -789,7 +854,7 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         isThreeLine: true,
                         onTap: () {
                           setState(() {
-                            addNewTab(url: favorite.url);
+                            addNewTab(context, url: favorite.url);
                             Navigator.pop(context);
                           });
                         },
@@ -976,68 +1041,6 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                       : UserPreferredContentMode.RECOMMENDED)));
       await _webViewController.reload();
     }
-  }
-
-  void showSearchEngineDialog(var webViewModel, var browserModel) {
-    var settings = browserModel.getSettings();
-
-    var url = webViewModel.url;
-    if (url == null || url.toString().isEmpty) {
-      return;
-    }
-
-    route = CustomPopupDialog.show(
-      context: context,
-      transitionDuration: customPopupDialogTransitionDuration,
-      builder: (context) {
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: SearchEngines.length,
-          itemBuilder: (BuildContext context, int index) {
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: Container(
-                  width: 30,
-                  child: Center(
-                      child: Image.asset(SearchEngines[index].assetIcon))),
-              horizontalTitleGap: 10,
-              title: Text(SearchEngines[index].name),
-              subtitle: Text(SearchEngines[index].url),
-              onTap: () {
-                setState(() {
-                  settings.searchEngine = SearchEngines[index];
-
-                  browserModel.updateSettings(settings);
-                });
-                Get.back();
-              },
-            );
-          },
-        );
-        // return ListTile(
-        //   title: const Text("Search Engine"),
-        //   subtitle: Text(settings.searchEngine.name),
-        //   trailing: DropdownButton<SearchEngineModel>(
-        //     hint: Text("Search Engine"),
-        //     onChanged: (value) {
-        //       setState(() {
-        //         if (value != null) {
-        //           settings.searchEngine = value;
-        //         }
-        //         browserModel.updateSettings(settings);
-        //       });
-        //     },
-        //     value: settings.searchEngine,
-        //     items: SearchEngines.map((searchEngine) {
-        //       return DropdownMenuItem(
-        //         value: searchEngine,
-        //         child: Text(searchEngine.name),
-        //       );
-        //     }).toList(),
-        //   ),
-        // );
-      },
-    );
   }
 
   void showUrlInfo() {
