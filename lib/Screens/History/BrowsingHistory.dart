@@ -55,14 +55,19 @@ class _BrowsingHistoryState extends State<BrowsingHistory> {
         title: Text(
           'History',
         ),
-        // actions: [
-        //   IconButton(
-        //       icon: Icon(
-        //         CupertinoIcons.search_circle,
-        //         size: 30,
-        //       ),
-        //       onPressed: () {})
-        // ],
+        actions: [
+          TextButton(
+            onPressed: () {
+              for (int i = 0; i < histories!.length; i++) {
+                DBQueries().deleteHistory(histories![i].id.toString());
+              }
+            },
+            child: Text(
+              "Clear All",
+              style: TextStyle(color: Colors.white),
+            ),
+          )
+        ],
         backgroundColor: UIColors.primaryDarkColor,
         elevation: 0,
       ),

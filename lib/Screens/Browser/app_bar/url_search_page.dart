@@ -71,6 +71,7 @@ class _UrlSearchState extends State<UrlSearch> {
 
   getHistory() {
     DBQueries().getHistory().then((value) {
+      print(value.length);
       setState(() {
         histories = value;
       });
@@ -120,23 +121,23 @@ class _UrlSearchState extends State<UrlSearch> {
                       });
                 }),
             Divider(),
-            Expanded(
-              child: histories == null
-                  ? Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      physics: BouncingScrollPhysics(),
-                      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: histories!.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return histories![index].url!.contains(searchTest)
-                                ? historyItem(index)
-                                : Container();
-                          }),
-                    ),
-            ),
+            // Expanded(
+            //   child: histories == null
+            //       ? Center(child: CircularProgressIndicator())
+            //       : SingleChildScrollView(
+            //           physics: BouncingScrollPhysics(),
+            //           padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            //           child: ListView.builder(
+            //               shrinkWrap: true,
+            //               physics: NeverScrollableScrollPhysics(),
+            //               itemCount: histories!.length,
+            //               itemBuilder: (BuildContext context, int index) {
+            //                 return histories![index].url!.contains(searchTest)
+            //                     ? historyItem(index)
+            //                     : Container();
+            //               }),
+            //         ),
+            // ),
           ],
         ),
       ),
@@ -195,9 +196,10 @@ class _UrlSearchState extends State<UrlSearch> {
               openUrl(value, settings, _webViewController, webViewModel);
             },
             onChanged: (value) {
-              setState(() {
-                searchTest = value;
-              });
+              if (histories!.length > 0)
+                setState(() {
+                  searchTest = value;
+                });
             },
             keyboardType: TextInputType.url,
             focusNode: _focusNode,

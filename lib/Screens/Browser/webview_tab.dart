@@ -740,10 +740,10 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
                         }
                       },
                       child: bottomMenuItem(
-                          "${webViewModel!.isDesktopMode ? "Desktop" : "Mobile"} Mode",
+                          "${webViewModel!.isDesktopMode ? "Mobile" : "Desktop"} Mode",
                           webViewModel.isDesktopMode
-                              ? Icons.desktop_mac_rounded
-                              : Icons.phone_android)),
+                              ? Icons.phone_android
+                              : Icons.desktop_mac_rounded)),
                 TextButton(
                     onPressed: () {
                       if (LocalData().checkUserLogin()) {

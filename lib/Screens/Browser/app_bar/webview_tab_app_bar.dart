@@ -799,11 +799,11 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
-    if (url == null) {
-      url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-          ? Uri.parse(settings.customUrlHomePage)
-          : Uri.parse(settings.searchEngine.url);
-    }
+    // if (url == null) {
+    //   url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
+    //       ? Uri.parse(settings.customUrlHomePage)
+    //       : Uri.parse(settings.searchEngine.url);
+    // }
 
     browserModel.addTab(WebViewTab(
       key: GlobalKey(),
