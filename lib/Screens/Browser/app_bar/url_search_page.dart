@@ -242,7 +242,7 @@ class _UrlSearchState extends State<UrlSearch> {
     var url = Uri.parse(value.trim());
 
     if (!value.contains(".")) {
-      url = Uri.parse(settings.searchEngine.searchUrl + value);
+      value = settings.searchEngine.searchUrl + value;
     } else {
       if (!value.contains("www.") && !value.startsWith("http")) {
         value = "www." + value;
@@ -253,12 +253,12 @@ class _UrlSearchState extends State<UrlSearch> {
     }
     url = Uri.parse(value);
 
-    if (_webViewController != null) {
-      _webViewController.loadUrl(urlRequest: URLRequest(url: url));
-    } else {
-      addNewTab(context, url: url);
-      webViewModel.url = url;
-    }
+    // if (_webViewController != null) {
+    _webViewController.loadUrl(urlRequest: URLRequest(url: url));
+    // } else {
+    //   addNewTab(context, url: url);
+    //   webViewModel.url = url;
+    // }
     Get.back();
   }
 
