@@ -5,7 +5,7 @@ class PopupMenuActions {
   static const String HISTORY = "History";
   static const String DOWNLOADS = "Downloads";
   static const String SHARE = "Share";
-  static const String DESKTOP_MODE = "Desktop mode";
+  // static const String DESKTOP_MODE = "Desktop mode";
 
   static const List<String> choices = <String>[
     NEW_TAB,
@@ -14,6 +14,6 @@ class PopupMenuActions {
     HISTORY,
     DOWNLOADS,
     SHARE,
-    DESKTOP_MODE,
+    // DESKTOP_MODE,
   ];
 }

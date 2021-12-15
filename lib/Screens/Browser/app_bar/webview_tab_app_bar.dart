@@ -1,17 +1,17 @@
 import 'dart:io';
 
-import 'package:best_browser/Screens/Browser/app_bar/url_info_popup.dart';
-import 'package:best_browser/Screens/Browser/custom_image.dart';
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/favorite_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/pages/developers/main.dart';
-import 'package:best_browser/Screens/Browser/pages/settings/main.dart';
-import 'package:best_browser/Service/Network.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Screens/Browser/app_bar/url_info_popup.dart';
+import 'package:iBrowser/Screens/Browser/custom_image.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/favorite_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/pages/developers/main.dart';
+import 'package:iBrowser/Screens/Browser/pages/settings/main.dart';
+import 'package:iBrowser/Service/Network.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
@@ -192,7 +192,8 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
               onPressed: () {
                 // showUrlInfo();
 
-                showSearchEngineDialog(webViewModel, browserModel, context);
+                // showSearchEngineDialog(webViewModel, browserModel, context);
+                showSearchEngineDialog(browserModel, context);
               },
             ),
             Expanded(
@@ -689,28 +690,28 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
                         )
                       ]),
                 );
-              case PopupMenuActions.DESKTOP_MODE:
-                return CustomPopupMenuItem<String>(
-                  enabled: browserModel.getCurrentTab() != null,
-                  value: choice,
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(choice),
-                        Selector<WebViewModel, bool>(
-                          selector: (context, webViewModel) =>
-                              webViewModel.isDesktopMode,
-                          builder: (context, value, child) {
-                            return Icon(
-                              value
-                                  ? Icons.check_box
-                                  : Icons.check_box_outline_blank,
-                              color: Colors.black,
-                            );
-                          },
-                        )
-                      ]),
-                );
+              // case PopupMenuActions.DESKTOP_MODE:
+              //   return CustomPopupMenuItem<String>(
+              //     enabled: browserModel.getCurrentTab() != null,
+              //     value: choice,
+              //     child: Row(
+              //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //         children: [
+              //           Text(choice),
+              //           Selector<WebViewModel, bool>(
+              //             selector: (context, webViewModel) =>
+              //                 webViewModel.isDesktopMode,
+              //             builder: (context, value, child) {
+              //               return Icon(
+              //                 value
+              //                     ? Icons.check_box
+              //                     : Icons.check_box_outline_blank,
+              //                 color: Colors.black,
+              //               );
+              //             },
+              //           )
+              //         ]),
+              //   );
               case PopupMenuActions.HISTORY:
                 return CustomPopupMenuItem<String>(
                   // enabled: browserModel.getCurrentTab() != null,
@@ -789,9 +790,9 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
       case PopupMenuActions.SHARE:
         share();
         break;
-      case PopupMenuActions.DESKTOP_MODE:
-        toggleDesktopMode();
-        break;
+      // case PopupMenuActions.DESKTOP_MODE:
+      //   toggleDesktopMode();
+      //   break;
     }
   }
 
@@ -1022,26 +1023,26 @@ class _WebViewTabAppBarState extends State<WebViewTabAppBar>
     }
   }
 
-  void toggleDesktopMode() async {
-    var browserModel = Provider.of<BrowserModel>(context, listen: false);
-    var webViewModel = browserModel.getCurrentTab()?.webViewModel;
-    var _webViewController = webViewModel?.webViewController;
-
-    var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
-
-    if (_webViewController != null) {
-      webViewModel?.isDesktopMode = !webViewModel.isDesktopMode;
-      currentWebViewModel.isDesktopMode = webViewModel?.isDesktopMode ?? false;
-
-      await _webViewController.setOptions(
-          options: InAppWebViewGroupOptions(
-              crossPlatform: InAppWebViewOptions(
-                  preferredContentMode: webViewModel?.isDesktopMode ?? false
-                      ? UserPreferredContentMode.DESKTOP
-                      : UserPreferredContentMode.RECOMMENDED)));
-      await _webViewController.reload();
-    }
-  }
+  // void toggleDesktopMode() async {
+  //   var browserModel = Provider.of<BrowserModel>(context, listen: false);
+  //   var webViewModel = browserModel.getCurrentTab()?.webViewModel;
+  //   var _webViewController = webViewModel?.webViewController;
+  //
+  //   var currentWebViewModel = Provider.of<WebViewModel>(context, listen: false);
+  //
+  //   if (_webViewController != null) {
+  //     webViewModel?.isDesktopMode = !webViewModel.isDesktopMode;
+  //     currentWebViewModel.isDesktopMode = webViewModel?.isDesktopMode ?? false;
+  //
+  //     await _webViewController.setOptions(
+  //         options: InAppWebViewGroupOptions(
+  //             crossPlatform: InAppWebViewOptions(
+  //                 preferredContentMode: webViewModel?.isDesktopMode ?? false
+  //                     ? UserPreferredContentMode.DESKTOP
+  //                     : UserPreferredContentMode.RECOMMENDED)));
+  //     await _webViewController.reload();
+  //   }
+  // }
 
   void showUrlInfo() {
     var webViewModel = Provider.of<WebViewModel>(context, listen: false);

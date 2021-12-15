@@ -1,11 +1,11 @@
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/pages/settings/android_settings.dart';
-import 'package:best_browser/Screens/Browser/pages/settings/cross_platform_settings.dart';
-import 'package:best_browser/Screens/Browser/pages/settings/ios_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/pages/settings/android_settings.dart';
+import 'package:iBrowser/Screens/Browser/pages/settings/cross_platform_settings.dart';
+import 'package:iBrowser/Screens/Browser/pages/settings/ios_settings.dart';
 import 'package:provider/provider.dart';
 
 import '../../custom_popup_menu_item.dart';

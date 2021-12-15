@@ -1,10 +1,14 @@
-import 'package:best_browser/PoJo/AdsModel.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart' as fb;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:iBrowser/PoJo/AdsModel.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
+import 'package:iBrowser/Utils/ad_network.dart';
 import 'package:sizer/sizer.dart';
+import 'package:unity_ads_plugin/unity_ads.dart';
 
 class AdsBrowsing extends StatefulWidget {
   @override
@@ -17,10 +21,45 @@ class _AdsBrowsingState extends State<AdsBrowsing> {
   bool isData = true;
   bool isLoading = false;
 
+  late BannerAd _bannerAd;
+
   void initState() {
     getData();
 
+    fb.FacebookAudienceNetwork.init();
+
+    UnityAds.init(
+      gameId: unityAppId,
+      testMode: testAd,
+      listener: (state, args) => print('Init Listener: $state => $args'),
+    );
+
+    _bannerAd = BannerAd(
+      adUnitId: testAd ? BannerAd.testAdUnitId : admobBannerId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          print('$BannerAd loaded.');
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          print('$BannerAd failedToLoad: $error');
+        },
+        onAdOpened: (Ad ad) => print('$BannerAd onAdOpened.'),
+        onAdClosed: (Ad ad) => print('$BannerAd onAdClosed.'),
+        onAdImpression: (Ad ad) => print('$BannerAd onAdImpression.'),
+      ),
+    );
+
+    _bannerAd.load();
+
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
   }
 
   @override
@@ -50,6 +89,7 @@ class _AdsBrowsingState extends State<AdsBrowsing> {
 
   @override
   Widget build(BuildContext context) {
+    final AdWidget adWidget = AdWidget(ad: _bannerAd);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -105,9 +145,41 @@ class _AdsBrowsingState extends State<AdsBrowsing> {
                               physics: NeverScrollableScrollPhysics(),
                               itemCount: ads.length,
                               separatorBuilder: (context, index) {
-                                return SizedBox(
-                                  height: 5,
-                                );
+                                return index % 9 == 0
+                                    ? Container(
+                                        alignment: Alignment.center,
+                                        child: adWidget,
+                                        width: _bannerAd.size.width.toDouble(),
+                                        height:
+                                            _bannerAd.size.height.toDouble(),
+                                      )
+                                    : index % 6 == 0
+                                        ? Center(
+                                            child: UnityBannerAd(
+                                              placementId: unityBannerId,
+                                              listener: (state, args) {
+                                                print(
+                                                    'Banner Listener: $state => $args');
+                                              },
+                                            ),
+                                          )
+                                        : index % 3 == 0
+                                            ? Container(
+                                                alignment: Alignment(0.5, 1),
+                                                child: fb.FacebookBannerAd(
+                                                  placementId: testAd
+                                                      ? "IMG_16_9_APP_INSTALL#$facebookBannerId"
+                                                      : facebookBannerId,
+                                                  bannerSize:
+                                                      fb.BannerSize.STANDARD,
+                                                  listener: (result, value) {
+                                                    print(value);
+                                                  },
+                                                ),
+                                              )
+                                            : SizedBox(
+                                                height: 10,
+                                              );
                               },
                               itemBuilder: (BuildContext context, int index) {
                                 return GestureDetector(

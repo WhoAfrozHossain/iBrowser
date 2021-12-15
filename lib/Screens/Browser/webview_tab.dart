@@ -3,25 +3,27 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:app_review/app_review.dart';
-import 'package:best_browser/Controller/Controller.dart';
-import 'package:best_browser/Dialog/LoginDialog.dart';
-import 'package:best_browser/PoJo/UserModel.dart';
-import 'package:best_browser/Screens/Browser/empty_tab.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/tab_popup_menu_actions.dart';
-import 'package:best_browser/Screens/Browser/util.dart';
-import 'package:best_browser/Service/LocalData.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Service/SQFlite/DBQueries.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
-import 'package:best_browser/main.dart';
 import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart' as fb;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Controller/Controller.dart';
+import 'package:iBrowser/Dialog/LoginDialog.dart';
+import 'package:iBrowser/PoJo/UserModel.dart';
+import 'package:iBrowser/Screens/Browser/empty_tab.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/tab_popup_menu_actions.dart';
+import 'package:iBrowser/Screens/Browser/util.dart';
+import 'package:iBrowser/Service/LocalData.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Service/SQFlite/DBQueries.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
+import 'package:iBrowser/Utils/ad_network.dart';
+import 'package:iBrowser/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -83,6 +85,8 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         appVersion = onValue.version;
       });
     });
+
+    fb.FacebookAudienceNetwork.init();
 
     IsolateNameServer.registerPortWithName(
         _port.sendPort, 'downloader_send_port');
@@ -229,8 +233,19 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
                     child: IconButton(
                         onPressed: () {
                           setState(() {
-                            webView.url = null;
-                            webViewModel.url = null;
+                            // webViewModel = WebViewTab(
+                            //   key: GlobalKey(),
+                            //   webViewModel: WebViewModel(url: url),
+                            // );
+                            // webView.url = null;
+                            // webViewModel.url = null;
+                            // webViewModel = WebViewModel(url: null);
+
+                            browserModel.closeTab(webViewModel.tabIndex!);
+                            browserModel.addTab(WebViewTab(
+                              key: GlobalKey(),
+                              webViewModel: WebViewModel(url: null),
+                            ));
                           });
                         },
                         icon: Icon(
@@ -399,6 +414,18 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
+            alignment: Alignment(0.5, 1),
+            child: fb.FacebookBannerAd(
+              placementId: testAd
+                  ? "IMG_16_9_APP_INSTALL#$facebookBannerId"
+                  : facebookBannerId,
+              bannerSize: fb.BannerSize.MEDIUM_RECTANGLE,
+              listener: (result, value) {
+                print(value);
+              },
+            ),
+          ),
+          Container(
               padding: EdgeInsets.all(10),
               child: Row(
                 children: [
@@ -413,7 +440,7 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
                     child: InkWell(
                       onTap: () {
                         if (userData == null) {
-                          Get.toNamed('/auth/start');
+                          Get.toNamed('/auth/login');
                         }
                       },
                       child: Column(
@@ -718,32 +745,32 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
                       }
                     },
                     child: bottomMenuItem("Bookmarks", Icons.bookmarks)),
-                if (browserModel.webViewTabs.length > 0)
-                  TextButton(
-                      onPressed: () async {
-                        if (_webViewController != null) {
-                          webViewModel?.isDesktopMode =
-                              !webViewModel.isDesktopMode;
-                          currentWebViewModel.isDesktopMode =
-                              webViewModel?.isDesktopMode ?? false;
-
-                          await _webViewController.setOptions(
-                              options: InAppWebViewGroupOptions(
-                                  crossPlatform: InAppWebViewOptions(
-                                      preferredContentMode:
-                                          webViewModel?.isDesktopMode ?? false
-                                              ? UserPreferredContentMode.DESKTOP
-                                              : UserPreferredContentMode
-                                                  .RECOMMENDED)));
-                          await _webViewController.reload();
-                          Get.back();
-                        }
-                      },
-                      child: bottomMenuItem(
-                          "${webViewModel!.isDesktopMode ? "Mobile" : "Desktop"} Mode",
-                          webViewModel.isDesktopMode
-                              ? Icons.phone_android
-                              : Icons.desktop_mac_rounded)),
+                // if (browserModel.webViewTabs.length > 0)
+                //   TextButton(
+                //       onPressed: () async {
+                //         if (_webViewController != null) {
+                //           webViewModel?.isDesktopMode =
+                //               !webViewModel.isDesktopMode;
+                //           currentWebViewModel.isDesktopMode =
+                //               webViewModel?.isDesktopMode ?? false;
+                //
+                //           await _webViewController.setOptions(
+                //               options: InAppWebViewGroupOptions(
+                //                   crossPlatform: InAppWebViewOptions(
+                //                       preferredContentMode:
+                //                           webViewModel?.isDesktopMode ?? false
+                //                               ? UserPreferredContentMode.DESKTOP
+                //                               : UserPreferredContentMode
+                //                                   .RECOMMENDED)));
+                //           await _webViewController.reload();
+                //           Get.back();
+                //         }
+                //       },
+                //       child: bottomMenuItem(
+                //           "${webViewModel!.isDesktopMode ? "Mobile" : "Desktop"} Mode",
+                //           webViewModel.isDesktopMode
+                //               ? Icons.phone_android
+                //               : Icons.desktop_mac_rounded)),
                 TextButton(
                     onPressed: () {
                       if (LocalData().checkUserLogin()) {
@@ -787,12 +814,17 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
                         "Account Settngs", Icons.settings_rounded)),
                 TextButton(
                     onPressed: () {
-                      if (LocalData().checkUserLogin()) {
-                        LocalData().logOut();
-                      } else {
+                      // if (LocalData().checkUserLogin()) {
+                      LocalData().logOut().then((value) {
                         Get.back();
-                        loginNotifyDialog();
-                      }
+                        setState(() {
+                          userData = null;
+                        });
+                      });
+                      // } else {
+                      //   Get.back();
+                      //   loginNotifyDialog();
+                      // }
                     },
                     child: bottomMenuItem("Logout", Icons.logout))
               ],
@@ -871,6 +903,12 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     'visariomedia.com'
   ];
 
+  List<String> unBlockUrls = [
+    'jobsexamalert.com',
+    'jobstestbd.com',
+    'breakingnews24.com.bd',
+  ];
+
   InAppWebView _buildWebView() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
@@ -889,17 +927,6 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialOptions.crossPlatform.userAgent =
         "Mozilla/5.0 (Linux; Android 9; LG-H870 Build/PKQ1.190522.001) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/83.0.4103.106 Mobile Safari/537.36";
     initialOptions.crossPlatform.transparentBackground = true;
-    // initialOptions.crossPlatform.contentBlockers = [
-    //   ContentBlocker(
-    //       trigger: ContentBlockerTrigger(urlFilter: ".*", resourceType: const [
-    //         ContentBlockerTriggerResourceType.IMAGE,
-    //         ContentBlockerTriggerResourceType.SCRIPT,
-    //         ContentBlockerTriggerResourceType.STYLE_SHEET,
-    //       ], ifDomain: [
-    //         "doubleclick.net",
-    //       ]),
-    //       action: ContentBlockerAction(type: ContentBlockerActionType.BLOCK))
-    // ];
 
     initialOptions.android.useShouldInterceptRequest = true;
     initialOptions.android.safeBrowsingEnabled = true;
@@ -933,9 +960,16 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       ) async {
         String currentUrl = request.url.toString();
         bool isAd = false;
+
         for (int i = 0; i < blockUrls.length; i++) {
           if (currentUrl.contains(blockUrls[i])) {
             isAd = true;
+          }
+        }
+
+        for (int i = 0; i < unBlockUrls.length; i++) {
+          if (currentUrl.contains(unBlockUrls[i])) {
+            isAd = false;
           }
         }
 
@@ -946,6 +980,21 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
         } else {
           return null;
         }
+      },
+
+      onEnterFullscreen: (controller) async {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
+      },
+      onExitFullscreen: (controller) async {
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitDown,
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.landscapeRight,
+          DeviceOrientation.landscapeLeft,
+        ]);
       },
 
       windowId: widget.webViewModel.windowId,
@@ -1135,24 +1184,6 @@ class WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
           currentWebViewModel.updateWithValue(widget.webViewModel);
         }
       },
-      // shouldOverrideUrlLoading: (controller, navigationAction) async {
-      //   var url = navigationAction.request.url;
-      //
-      //   if (url != null &&
-      //       !["https", "http", "file", "chrome", "data", "javascript", "about"]
-      //           .contains(url.scheme)) {
-      //     if (await canLaunch(url.toString())) {
-      //       // Launch the App
-      //       await launch(
-      //         url.toString(),
-      //       );
-      //       // and cancel the request
-      //       return NavigationActionPolicy.CANCEL;
-      //     }
-      //   }
-      //
-      //   return NavigationActionPolicy.CANCEL;
-      // },
       onDownloadStart: (controller, url) async {
         if (await Permission.storage.request().isGranted) {
           Directory? downloadPath =

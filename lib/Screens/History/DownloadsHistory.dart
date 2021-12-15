@@ -1,8 +1,8 @@
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 
@@ -79,8 +79,8 @@ class _DownloadsHistoryState extends State<DownloadsHistory> {
                     itemBuilder: (BuildContext context, int index) {
                       var path = tasks[index].savedDir.split('/');
                       String downloadPath = "";
-                      for(int i=4; i<path.length; i++){
-                        downloadPath += "/"+path[i];
+                      for (int i = 4; i < path.length; i++) {
+                        downloadPath += "/" + path[i];
                       }
                       return InkWell(
                         onTap: () {

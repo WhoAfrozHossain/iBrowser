@@ -1,7 +1,7 @@
-import 'package:best_browser/Screens/Browser/app_bar/certificates_info_popup.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/app_bar/certificates_info_popup.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_popup_dialog.dart';

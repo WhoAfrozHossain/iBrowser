@@ -1,5 +1,5 @@
-import 'package:best_browser/Controller/Controller.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Controller/Controller.dart';
 
 class BindingControllers extends Bindings {
   @override

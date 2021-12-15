@@ -3,14 +3,14 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:best_browser/PoJo/AdsModel.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/PoJo/AdsModel.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AdsVisit extends StatefulWidget {

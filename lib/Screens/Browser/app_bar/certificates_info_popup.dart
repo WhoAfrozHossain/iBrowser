@@ -1,12 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';

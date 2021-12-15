@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/search_engine_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/search_engine_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
 import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 

@@ -1,14 +1,13 @@
-import 'package:best_browser/PoJo/HistoryModel.dart';
-import 'package:best_browser/Screens/Browser/app_bar/global_widget.dart';
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Service/SQFlite/DBQueries.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
+import 'package:iBrowser/PoJo/HistoryModel.dart';
+import 'package:iBrowser/Screens/Browser/app_bar/global_widget.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Service/SQFlite/DBQueries.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
@@ -51,13 +50,6 @@ class _UrlSearchState extends State<UrlSearch> {
             (await _webViewController?.getUrl())?.toString() ?? "";
       }
     });
-
-    // final newText = _searchController!.text.toLowerCase();
-    // _searchController!.value = _searchController!.value.copyWith(
-    //   text: newText,
-    //   selection: TextSelection(baseOffset: 0, extentOffset: newText.length),
-    //   composing: TextRange.empty,
-    // );
   }
 
   @override
@@ -88,7 +80,8 @@ class _UrlSearchState extends State<UrlSearch> {
         child: Column(
           children: [
             Selector<WebViewModel, Uri?>(
-                selector: (context, webViewModel) => webViewModel.url,
+                selector: (context, webViewModel) =>
+                    webViewModel.url == null ? Uri.parse("") : webViewModel.url,
                 builder: (context, url, child) {
                   if (url == null) {
                     _searchController?.text = "";
@@ -120,24 +113,38 @@ class _UrlSearchState extends State<UrlSearch> {
                               );
                       });
                 }),
-            Divider(),
-            // Expanded(
-            //   child: histories == null
-            //       ? Center(child: CircularProgressIndicator())
-            //       : SingleChildScrollView(
-            //           physics: BouncingScrollPhysics(),
-            //           padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
-            //           child: ListView.builder(
-            //               shrinkWrap: true,
-            //               physics: NeverScrollableScrollPhysics(),
-            //               itemCount: histories!.length,
-            //               itemBuilder: (BuildContext context, int index) {
-            //                 return histories![index].url!.contains(searchTest)
-            //                     ? historyItem(index)
-            //                     : Container();
-            //               }),
-            //         ),
+            // AppBar(
+            //   automaticallyImplyLeading: false,
+            //   backgroundColor: Colors.black87,
+            //   titleSpacing: 10.0,
+            //   title: _buildSearchTextField(),
+            //   // actions: _buildActionsMenu(),
             // ),
+            Expanded(
+              child: histories == null
+                  ? Center(child: CircularProgressIndicator())
+                  : SingleChildScrollView(
+                      physics: BouncingScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                      child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          separatorBuilder: (context, index) {
+                            return SizedBox(
+                              height:
+                                  histories![index].url!.contains(searchTest)
+                                      ? 8
+                                      : 0,
+                            );
+                          },
+                          itemCount: histories!.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return histories![index].url!.contains(searchTest)
+                                ? historyItem(index)
+                                : Container();
+                          }),
+                    ),
+            ),
           ],
         ),
       ),
@@ -171,6 +178,8 @@ class _UrlSearchState extends State<UrlSearch> {
     );
   }
 
+  bool select = true;
+
   Widget _buildSearchTextField() {
     var browserModel = Provider.of<BrowserModel>(context, listen: true);
     var settings = browserModel.getSettings();
@@ -184,13 +193,17 @@ class _UrlSearchState extends State<UrlSearch> {
         children: <Widget>[
           TextField(
             onTap: () {
-              final newText = _searchController!.text.toLowerCase();
-              _searchController!.value = _searchController!.value.copyWith(
-                text: newText,
-                selection:
-                    TextSelection(baseOffset: 0, extentOffset: newText.length),
-                composing: TextRange.empty,
-              );
+              if (select) {
+                final newText = _searchController!.text.toLowerCase();
+                _searchController!.value = _searchController!.value.copyWith(
+                  text: newText,
+                  selection: TextSelection(
+                      baseOffset: 0, extentOffset: newText.length),
+                  composing: TextRange.empty,
+                );
+
+                select = false;
+              }
             },
             onSubmitted: (value) {
               openUrl(value, settings, _webViewController, webViewModel);
@@ -229,7 +242,8 @@ class _UrlSearchState extends State<UrlSearch> {
             onPressed: () {
               // showUrlInfo();
 
-              showSearchEngineDialog(webViewModel, browserModel, context);
+              // showSearchEngineDialog(webViewModel, browserModel, context);
+              showSearchEngineDialog(browserModel, context);
             },
           ),
         ],
@@ -253,12 +267,12 @@ class _UrlSearchState extends State<UrlSearch> {
     }
     url = Uri.parse(value);
 
-    // if (_webViewController != null) {
-    _webViewController.loadUrl(urlRequest: URLRequest(url: url));
-    // } else {
-    //   addNewTab(context, url: url);
-    //   webViewModel.url = url;
-    // }
+    if (_webViewController != null) {
+      _webViewController.loadUrl(urlRequest: URLRequest(url: url));
+    } else {
+      addNewTab(context, url: url);
+      webViewModel.url = url;
+    }
     Get.back();
   }
 
@@ -276,7 +290,7 @@ class _UrlSearchState extends State<UrlSearch> {
       },
       child: Container(
         color: UIColors.backgroundColor,
-        padding: EdgeInsets.all(5),
+        padding: EdgeInsets.all(8),
         child: Row(
           children: [
             histories![index].favicon != null
@@ -299,23 +313,16 @@ class _UrlSearchState extends State<UrlSearch> {
                 children: [
                   Text(
                     histories![index].title!,
+                    overflow: TextOverflow.ellipsis,
                     style:
                         TextStyle(color: UIColors.blackColor, fontSize: 12.sp),
                   ),
                   Text(
                     histories![index].url!,
+                    overflow: TextOverflow.ellipsis,
                     style:
                         TextStyle(color: UIColors.blackColor, fontSize: 10.sp),
                   ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      DateFormat.yMMMEd()
-                          .format(DateTime.parse(histories![index].date!)),
-                      style: TextStyle(
-                          color: UIColors.blackColor, fontSize: 10.sp),
-                    ),
-                  )
                 ],
               ),
             ),

@@ -1,8 +1,6 @@
 // import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:io';
 
-import 'package:best_browser/Screens/Browser/custom_image.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:iBrowser/Screens/Browser/custom_image.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';

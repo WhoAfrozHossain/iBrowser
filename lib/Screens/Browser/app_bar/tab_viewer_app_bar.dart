@@ -1,8 +1,8 @@
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/pages/settings/main.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/pages/settings/main.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
 import 'package:provider/provider.dart';
 
 import '../custom_popup_menu_item.dart';
@@ -185,11 +185,11 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
-    if (url == null) {
-      url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-          ? Uri.parse(settings.customUrlHomePage)
-          : Uri.parse(settings.searchEngine.url);
-    }
+    // if (url == null) {
+    //   url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
+    //       ? Uri.parse(settings.customUrlHomePage)
+    //       : Uri.parse(settings.searchEngine.url);
+    // }
 
     browserModel.showTabScroller = false;
 
@@ -203,11 +203,11 @@ class _TabViewerAppBarState extends State<TabViewerAppBar> {
     var browserModel = Provider.of<BrowserModel>(context, listen: false);
     var settings = browserModel.getSettings();
 
-    if (url == null) {
-      url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
-          ? Uri.parse(settings.customUrlHomePage)
-          : Uri.parse(settings.searchEngine.url);
-    }
+    // if (url == null) {
+    //   url = settings.homePageEnabled && settings.customUrlHomePage.isNotEmpty
+    //       ? Uri.parse(settings.customUrlHomePage)
+    //       : Uri.parse(settings.searchEngine.url);
+    // }
 
     browserModel.showTabScroller = false;
 

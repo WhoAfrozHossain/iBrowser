@@ -1,6 +1,6 @@
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:sizer/sizer.dart';
 
 loginNotifyDialog() {
@@ -33,7 +33,7 @@ loginNotifyDialog() {
               Expanded(
                 child: TextButton(
                   onPressed: () {
-                    Get.offAndToNamed('/auth/start');
+                    Get.offAndToNamed('/auth/login');
                   },
                   child: Text(
                     "Ok, Login",

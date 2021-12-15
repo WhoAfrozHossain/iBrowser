@@ -1,12 +1,18 @@
+import 'dart:math';
+
 import 'package:app_review/app_review.dart';
-import 'package:best_browser/PoJo/UserModel.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart' as fb;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:iBrowser/PoJo/UserModel.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
+import 'package:iBrowser/Utils/ad_network.dart';
 import 'package:share/share.dart';
 import 'package:sizer/sizer.dart';
+import 'package:unity_ads_plugin/unity_ads.dart';
 
 class EarningDashboard extends StatefulWidget {
   @override
@@ -14,15 +20,54 @@ class EarningDashboard extends StatefulWidget {
 }
 
 class _EarningDashboardState extends State<EarningDashboard> {
+  static final AdRequest request = AdRequest();
+
   UserModel? userData;
 
   String? appID = "";
   String? output = "";
   String? appVersion = "";
 
+  late BannerAd _bannerAd;
+
+  RewardedAd? _rewardedAd;
+  int _numRewardedLoadAttempts = 0;
+  int maxFailedLoadAttempts = 3;
+
   @override
   void initState() {
     getUserData();
+
+    fb.FacebookAudienceNetwork.init(
+      testingId: testAd ? "37b1da9d-b48c-4103-a393-2e095e734bd6" : null,
+    );
+
+    UnityAds.init(
+      gameId: unityAppId,
+      testMode: testAd,
+      listener: (state, args) => print('Init Listener: $state => $args'),
+    );
+
+    _bannerAd = BannerAd(
+      adUnitId: testAd ? BannerAd.testAdUnitId : admobBannerId,
+      request: AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          print('$BannerAd loaded.');
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          print('$BannerAd failedToLoad: $error');
+        },
+        onAdOpened: (Ad ad) => print('$BannerAd onAdOpened.'),
+        onAdClosed: (Ad ad) => print('$BannerAd onAdClosed.'),
+        onAdImpression: (Ad ad) => print('$BannerAd onAdImpression.'),
+      ),
+    );
+
+    _bannerAd.load();
+
+    _createRewardedAd();
 
     AppReview.getPackageInfo().then((onValue) {
       setState(() {
@@ -42,8 +87,63 @@ class _EarningDashboardState extends State<EarningDashboard> {
     });
   }
 
+  void _createRewardedAd() {
+    RewardedAd.load(
+        adUnitId: RewardedAd.testAdUnitId,
+        request: request,
+        rewardedAdLoadCallback: RewardedAdLoadCallback(
+          onAdLoaded: (RewardedAd ad) {
+            print('$ad loaded.');
+            _rewardedAd = ad;
+            _numRewardedLoadAttempts = 0;
+          },
+          onAdFailedToLoad: (LoadAdError error) {
+            print('RewardedAd failed to load: $error');
+            _rewardedAd = null;
+            _numRewardedLoadAttempts += 1;
+            if (_numRewardedLoadAttempts <= maxFailedLoadAttempts) {
+              _createRewardedAd();
+            }
+          },
+        ));
+  }
+
+  void _showRewardedAd() {
+    if (_rewardedAd == null) {
+      print('Warning: attempt to show rewarded before loaded.');
+      return;
+    }
+    _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (RewardedAd ad) =>
+          print('ad onAdShowedFullScreenContent.'),
+      onAdDismissedFullScreenContent: (RewardedAd ad) {
+        print('$ad onAdDismissedFullScreenContent.');
+        ad.dispose();
+        _createRewardedAd();
+      },
+      onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
+        print('$ad onAdFailedToShowFullScreenContent: $error');
+        ad.dispose();
+        _createRewardedAd();
+      },
+    );
+
+    _rewardedAd!.show(onUserEarnedReward: (RewardedAd ad, RewardItem reward) {
+      print('$ad with reward $RewardItem(${reward.amount}, ${reward.type}');
+    });
+    _rewardedAd = null;
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    _rewardedAd?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AdWidget adWidget = AdWidget(ad: _bannerAd);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -163,6 +263,15 @@ class _EarningDashboardState extends State<EarningDashboard> {
                     SizedBox(
                       height: 10,
                     ),
+                    Container(
+                      alignment: Alignment.center,
+                      child: adWidget,
+                      width: _bannerAd.size.width.toDouble(),
+                      height: _bannerAd.size.height.toDouble(),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
                     InkWell(
                       onTap: () {
                         Get.toNamed('/ads/browse')!.then((value) {
@@ -213,53 +322,83 @@ class _EarningDashboardState extends State<EarningDashboard> {
                         ),
                       ),
                     ),
-                    // Divider(),
-                    // InkWell(
-                    //   onTap: () {},
-                    //   child: Container(
-                    //     width: Get.width,
-                    //     padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
-                    //     child: Row(
-                    //       children: [
-                    //         Image.asset(
-                    //           'assets/images/dashboard_icon_03.png',
-                    //           width: 50,
-                    //           fit: BoxFit.fitWidth,
-                    //         ),
-                    //         SizedBox(
-                    //           width: 10,
-                    //         ),
-                    //         Expanded(
-                    //           child: Column(
-                    //             mainAxisAlignment: MainAxisAlignment.start,
-                    //             crossAxisAlignment: CrossAxisAlignment.start,
-                    //             children: [
-                    //               Text(
-                    //                 "Browse your favorite sites",
-                    //                 style: TextStyle(
-                    //                     color: UIColors.blackColor,
-                    //                     fontWeight: FontWeight.bold,
-                    //                     fontSize: 14.sp),
-                    //               ),
-                    //               Text(
-                    //                 "Browse favorite websites and earn more! Get rewards for browsing activity.",
-                    //                 style: TextStyle(
-                    //                     color: UIColors.blackColor,
-                    //                     fontWeight: FontWeight.normal,
-                    //                     fontSize: 12.sp),
-                    //               )
-                    //             ],
-                    //           ),
-                    //         ),
-                    //         Icon(
-                    //           CupertinoIcons.forward,
-                    //           color: UIColors.primaryDarkColor,
-                    //           size: 30,
-                    //         )
-                    //       ],
-                    //     ),
-                    //   ),
-                    // ),
+                    Divider(),
+                    InkWell(
+                      onTap: () {
+                        var rng = new Random();
+
+                        int num = rng.nextInt(100);
+
+                        if (num % 3 == 0) {
+                          _showRewardedAd();
+                        } else if (num % 3 == 1) {
+                          UnityAds.showVideoAd(
+                            placementId: unityRewardId,
+                            listener: (state, args) => print(
+                                'Rewarded Video Listener: $state => $args'),
+                          );
+                        } else if (num % 3 == 2) {
+                          fb.FacebookRewardedVideoAd.loadRewardedVideoAd(
+                            placementId: facebookRewardId,
+                            listener: (result, value) {
+                              print(value);
+                            },
+                          );
+                        }
+                      },
+                      child: Container(
+                        width: Get.width,
+                        padding: EdgeInsets.fromLTRB(10, 10, 0, 10),
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              'assets/images/dashboard_icon_03.png',
+                              width: 50,
+                              fit: BoxFit.fitWidth,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Browse More Ads",
+                                    style: TextStyle(
+                                        color: UIColors.blackColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14.sp),
+                                  ),
+                                  Text(
+                                    "Browse more ads get rewards.",
+                                    style: TextStyle(
+                                        color: UIColors.blackColor,
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 12.sp),
+                                  )
+                                ],
+                              ),
+                            ),
+                            Icon(
+                              CupertinoIcons.forward,
+                              color: UIColors.primaryDarkColor,
+                              size: 30,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Center(
+                      child: UnityBannerAd(
+                        placementId: unityBannerId,
+                        listener: (state, args) {
+                          print('Banner Listener: $state => $args');
+                        },
+                      ),
+                    ),
                     SizedBox(height: 10),
                     Container(
                       width: Get.width,
@@ -558,6 +697,18 @@ class _EarningDashboardState extends State<EarningDashboard> {
                       ),
                     ),
                     Divider(),
+                    Container(
+                      alignment: Alignment(0.5, 1),
+                      child: fb.FacebookBannerAd(
+                        placementId: testAd
+                            ? "IMG_16_9_APP_INSTALL#$facebookBannerId"
+                            : facebookBannerId,
+                        bannerSize: fb.BannerSize.STANDARD,
+                        listener: (result, value) {
+                          print(value);
+                        },
+                      ),
+                    )
                   ],
                 ),
               ),

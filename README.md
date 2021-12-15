@@ -1,4 +1,4 @@
-# best_browser
+# iBrowser
 
 A new Flutter project.
 

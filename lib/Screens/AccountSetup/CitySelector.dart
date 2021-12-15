@@ -1,10 +1,10 @@
-import 'package:best_browser/PoJo/CityModel.dart';
-import 'package:best_browser/PoJo/CountryModel.dart';
-import 'package:best_browser/Service/LocalData.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/PoJo/CityModel.dart';
+import 'package:iBrowser/PoJo/CountryModel.dart';
+import 'package:iBrowser/Service/LocalData.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:sizer/sizer.dart';
 
 class CitySelector extends StatefulWidget {

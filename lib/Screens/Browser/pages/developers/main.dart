@@ -1,7 +1,7 @@
-import 'package:best_browser/Screens/Browser/pages/developers/javascript_console.dart';
-import 'package:best_browser/Screens/Browser/pages/developers/network_info.dart';
-import 'package:best_browser/Screens/Browser/pages/developers/storage_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/pages/developers/javascript_console.dart';
+import 'package:iBrowser/Screens/Browser/pages/developers/network_info.dart';
+import 'package:iBrowser/Screens/Browser/pages/developers/storage_manager.dart';
 
 class DevelopersPage extends StatefulWidget {
   DevelopersPage({Key? key}) : super(key: key);

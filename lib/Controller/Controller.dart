@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:best_browser/PoJo/NewsModel.dart';
-import 'package:best_browser/PoJo/OthersSitesModel.dart';
-import 'package:best_browser/PoJo/SpecialSitesModel.dart';
-import 'package:best_browser/Service/LocalData.dart';
-import 'package:best_browser/Service/Network.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/PoJo/NewsModel.dart';
+import 'package:iBrowser/PoJo/OthersSitesModel.dart';
+import 'package:iBrowser/PoJo/SpecialSitesModel.dart';
+import 'package:iBrowser/Service/LocalData.dart';
+import 'package:iBrowser/Service/Network.dart';
 
 class Controller extends GetxController {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();

@@ -1,11 +1,11 @@
-import 'package:best_browser/PoJo/InterestModel.dart';
-import 'package:best_browser/Service/LocalData.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/PoJo/InterestModel.dart';
+import 'package:iBrowser/Service/LocalData.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:sizer/sizer.dart';
 
 class InterestScreen extends StatefulWidget {

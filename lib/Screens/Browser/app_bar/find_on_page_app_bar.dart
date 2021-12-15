@@ -1,5 +1,5 @@
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
 import 'package:provider/provider.dart';
 
 class FindOnPageAppBar extends StatefulWidget {

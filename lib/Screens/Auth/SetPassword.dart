@@ -1,7 +1,7 @@
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:sizer/sizer.dart';
 
 class SetPassword extends StatefulWidget {

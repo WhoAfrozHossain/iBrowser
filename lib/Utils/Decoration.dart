@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 
 class CustomDecoration {
   DecorationImage watermark() {

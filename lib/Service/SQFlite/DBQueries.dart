@@ -1,5 +1,5 @@
-import 'package:best_browser/PoJo/HistoryModel.dart';
-import 'package:best_browser/Service/SQFlite/DatabaseHelper.dart';
+import 'package:iBrowser/PoJo/HistoryModel.dart';
+import 'package:iBrowser/Service/SQFlite/DatabaseHelper.dart';
 
 class DBQueries {
   final dbHelper = DatabaseHelper.instance;
@@ -23,9 +23,7 @@ class DBQueries {
   Future<List<HistoryModel>> getHistory() async {
     List<HistoryModel> history = [];
     final allRows = await dbHelper.queryAllRows();
-    print(allRows);
     allRows.forEach((row) {
-      print(row);
       HistoryModel model = new HistoryModel(
           id: row[DatabaseHelper.columnHistoryId],
           title: row[DatabaseHelper.columnHistoryTitle],
@@ -38,10 +36,10 @@ class DBQueries {
     return history;
   }
 
-  deleteHistory(String id) async {
+  Future<void> deleteHistory(String id) async {
     // Assuming that the number of rows is the id for the last row.
     //final id = await dbHelper.queryRowCount();
     final rowsDeleted = await dbHelper.delete(id);
-    print('deleted $rowsDeleted row(s): row $id');
+    // print('deleted $rowsDeleted row(s): row $id');
   }
 }

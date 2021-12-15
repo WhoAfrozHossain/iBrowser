@@ -1,30 +1,5 @@
 import 'dart:io';
 
-import 'package:best_browser/Controller/Bindings/Binding.dart';
-import 'package:best_browser/Screens/AccountSetup/CitySelector.dart';
-import 'package:best_browser/Screens/Ads/AdsBrowsing.dart';
-import 'package:best_browser/Screens/Ads/AdsVisit.dart';
-import 'package:best_browser/Screens/Auth/GettingStarted.dart';
-import 'package:best_browser/Screens/Auth/Login.dart';
-import 'package:best_browser/Screens/Auth/RecoverAccount.dart';
-import 'package:best_browser/Screens/Auth/Register.dart';
-import 'package:best_browser/Screens/Auth/SetPassword.dart';
-import 'package:best_browser/Screens/Bookmark/Bookmark.dart';
-import 'package:best_browser/Screens/Browser/app_bar/url_search_page.dart';
-import 'package:best_browser/Screens/Browser/browser.dart';
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Earning/EarningDashboard.dart';
-import 'package:best_browser/Screens/History/BrowsingHistory.dart';
-import 'package:best_browser/Screens/History/DownloadsHistory.dart';
-import 'package:best_browser/Screens/Interests/Interests.dart';
-import 'package:best_browser/Screens/Intro/intro1.dart';
-import 'package:best_browser/Screens/Intro/intro2.dart';
-import 'package:best_browser/Screens/Intro/intro3.dart';
-import 'package:best_browser/Screens/News/NewsView.dart';
-import 'package:best_browser/Screens/Setting/AccountSetting.dart';
-import 'package:best_browser/Screens/Withdraw/Withdraw.dart';
-import 'package:best_browser/SplashScreen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +8,32 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:iBrowser/Controller/Bindings/Binding.dart';
+import 'package:iBrowser/Screens/AccountSetup/CitySelector.dart';
+import 'package:iBrowser/Screens/Ads/AdsBrowsing.dart';
+import 'package:iBrowser/Screens/Ads/AdsVisit.dart';
+import 'package:iBrowser/Screens/Auth/GettingStarted.dart';
+import 'package:iBrowser/Screens/Auth/Login.dart';
+import 'package:iBrowser/Screens/Auth/RecoverAccount.dart';
+import 'package:iBrowser/Screens/Auth/Register.dart';
+import 'package:iBrowser/Screens/Auth/SetPassword.dart';
+import 'package:iBrowser/Screens/Bookmark/Bookmark.dart';
+import 'package:iBrowser/Screens/Browser/app_bar/url_search_page.dart';
+import 'package:iBrowser/Screens/Browser/browser.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Earning/EarningDashboard.dart';
+import 'package:iBrowser/Screens/History/BrowsingHistory.dart';
+import 'package:iBrowser/Screens/History/DownloadsHistory.dart';
+import 'package:iBrowser/Screens/Interests/Interests.dart';
+import 'package:iBrowser/Screens/Intro/intro1.dart';
+import 'package:iBrowser/Screens/Intro/intro2.dart';
+import 'package:iBrowser/Screens/Intro/intro3.dart';
+import 'package:iBrowser/Screens/News/NewsView.dart';
+import 'package:iBrowser/Screens/Setting/AccountSetting.dart';
+import 'package:iBrowser/Screens/Withdraw/Withdraw.dart';
+import 'package:iBrowser/SplashScreen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
@@ -67,6 +68,7 @@ const TAB_VIEWER_TOP_SCALE_BOTTOM_OFFSET = 230.0;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
 
   WEB_ARCHIVE_DIR = (await getApplicationSupportDirectory()).path;
 
@@ -80,9 +82,7 @@ void main() async {
     TAB_VIEWER_BOTTOM_OFFSET_3 = 130.0;
   }
 
-  await FlutterDownloader.initialize(
-      debug: true // optional: set false to disable printing logs to console
-      );
+  await FlutterDownloader.initialize(debug: false);
 
   await Permission.camera.request();
   await Permission.microphone.request();
@@ -157,7 +157,7 @@ void main() async {
       child: GetMaterialApp(
         theme: ThemeData(fontFamily: 'Ubuntu'),
         initialBinding: BindingControllers(),
-        initialRoute: '/',
+        initialRoute: '/browser',
         defaultTransition: Transition.noTransition,
         getPages: [
           GetPage(
@@ -169,9 +169,10 @@ void main() async {
             page: () => Browser(),
           ),
           GetPage(
-              name: '/url/search',
-              page: () => UrlSearch(),
-              transition: Transition.upToDown),
+            name: '/url/search',
+            page: () => UrlSearch(),
+            transition: Transition.upToDown,
+          ),
           GetPage(
             name: '/intro/1',
             page: () => IntroPageFirst(),

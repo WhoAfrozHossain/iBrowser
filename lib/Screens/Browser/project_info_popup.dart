@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
 import 'package:provider/provider.dart';
 
 import 'animated_flutter_browser_logo.dart';

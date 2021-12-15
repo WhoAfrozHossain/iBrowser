@@ -1,16 +1,19 @@
-import 'package:best_browser/Controller/Controller.dart';
-import 'package:best_browser/PoJo/NewsModel.dart';
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart' as fb;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Controller/Controller.dart';
+import 'package:iBrowser/PoJo/NewsModel.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
+import 'package:iBrowser/Utils/ad_network.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:unity_ads_plugin/unity_ads.dart';
 
 class NewsView extends StatefulWidget {
   const NewsView({Key? key}) : super(key: key);
@@ -28,6 +31,16 @@ class _NewsViewState extends State<NewsView> {
   void initState() {
     item = myController.selectedNews!;
     super.initState();
+
+    fb.FacebookAudienceNetwork.init(
+      testingId: testAd ? "37b1da9d-b48c-4103-a393-2e095e734bd6" : null,
+    );
+
+    UnityAds.init(
+      gameId: unityAppId,
+      testMode: testAd,
+      listener: (state, args) => print('Init Listener: $state => $args'),
+    );
   }
 
   @override
@@ -94,7 +107,18 @@ class _NewsViewState extends State<NewsView> {
                         ),
                       ),
                       SizedBox(
-                        height: 15,
+                        height: 10,
+                      ),
+                      Center(
+                        child: UnityBannerAd(
+                          placementId: unityBannerId,
+                          listener: (state, args) {
+                            print('Banner Listener: $state => $args');
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
                       ),
                       Container(
                         width: Get.width,
@@ -118,6 +142,18 @@ class _NewsViewState extends State<NewsView> {
                             fontSize: 17,
                           ),
                           textAlign: TextAlign.justify,
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment(0.5, 1),
+                        child: fb.FacebookBannerAd(
+                          placementId: testAd
+                              ? "IMG_16_9_APP_INSTALL#$facebookBannerId"
+                              : facebookBannerId,
+                          bannerSize: fb.BannerSize.STANDARD,
+                          listener: (result, value) {
+                            print(value);
+                          },
                         ),
                       )
                     ],

@@ -1,10 +1,10 @@
-import 'package:best_browser/Screens/Browser/custom_popup_dialog.dart';
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/search_engine_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Screens/Browser/custom_popup_dialog.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/search_engine_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
 import 'package:provider/provider.dart';
 
 CustomPopupDialogPageRoute? route;
@@ -26,13 +26,13 @@ void addNewTab(BuildContext context, {Uri? url}) {
 }
 
 void showSearchEngineDialog(
-    var webViewModel, var browserModel, BuildContext context) {
+    /*var webViewModel,*/ var browserModel, BuildContext context) {
   var settings = browserModel.getSettings();
-
-  var url = webViewModel.url;
-  if (url == null || url.toString().isEmpty) {
-    return;
-  }
+  //
+  // var url = webViewModel.url;
+  // if (url == null || url.toString().isEmpty) {
+  //   return;
+  // }
 
   route = CustomPopupDialog.show(
     context: context,

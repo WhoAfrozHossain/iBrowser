@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:best_browser/Service/LocalData.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:iBrowser/Service/LocalData.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:sizer/sizer.dart';
 
 class SplashScreen extends StatefulWidget {

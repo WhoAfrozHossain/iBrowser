@@ -1,6 +1,6 @@
-import 'package:best_browser/PoJo/UserModel.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:iBrowser/PoJo/UserModel.dart';
 
 class LocalData {
   final localData = GetStorage();
@@ -63,7 +63,7 @@ class LocalData {
     return localData.read('userId');
   }
 
-  void logOut() {
+  Future<void> logOut() async {
     localData.write('login', false);
     localData.write('userId', '');
     checkLocalData();

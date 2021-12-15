@@ -1,14 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 
-import 'package:best_browser/Controller/Controller.dart';
-import 'package:best_browser/Screens/Browser/app_bar/browser_app_bar.dart';
-import 'package:best_browser/Screens/Browser/custom_image.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/tab_viewer.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/Controller/Controller.dart';
+import 'package:iBrowser/Screens/Browser/app_bar/browser_app_bar.dart';
+import 'package:iBrowser/Screens/Browser/custom_image.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/tab_viewer.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
 import 'package:provider/provider.dart';
 
 import 'app_bar/tab_viewer_app_bar.dart';
@@ -24,34 +26,38 @@ class Browser extends StatefulWidget {
 class _BrowserState extends State<Browser> with SingleTickerProviderStateMixin {
   Controller myController = Get.put(Controller());
 
-  // static const platform =
-  //     const MethodChannel('com.pichillilorenzo.flutter_browser.intent_data');
+  static const platform =
+      const MethodChannel('com.raybim.iBrowser.intent_data');
 
   var _isRestored = false;
 
   @override
   void initState() {
     super.initState();
+    getIntentData();
+
     myController.clear();
 
     myController.getNews();
     myController.getFavoriteSites();
     myController.getOtherSiteRevenue();
-    // getIntentData();
   }
 
-  // getIntentData() async {
-  //   if (Platform.isAndroid) {
-  //     String? url = await platform.invokeMethod("getIntentData");
-  //     if (url != null) {
-  //       var browserModel = Provider.of<BrowserModel>(context, listen: false);
-  //       browserModel.addTab(WebViewTab(
-  //         key: GlobalKey(),
-  //         webViewModel: WebViewModel(url: Uri.parse(url)),
-  //       ));
-  //     }
-  //   }
-  // }
+  getIntentData() async {
+    if (Platform.isAndroid) {
+      print(".......................");
+      print(await platform.invokeMethod("getIntentData"));
+      print(".......................");
+      String? url = await platform.invokeMethod("getIntentData");
+      if (url != null) {
+        var browserModel = Provider.of<BrowserModel>(context, listen: false);
+        browserModel.addTab(WebViewTab(
+          key: GlobalKey(),
+          webViewModel: WebViewModel(url: Uri.parse(url)),
+        ));
+      }
+    }
+  }
 
   @override
   void dispose() {

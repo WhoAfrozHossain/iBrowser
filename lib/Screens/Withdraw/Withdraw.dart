@@ -1,13 +1,13 @@
-import 'package:best_browser/PoJo/UserModel.dart';
-import 'package:best_browser/PoJo/WithdrawalMethodModel.dart';
-import 'package:best_browser/PoJo/WithdrawalRequestModel.dart';
-import 'package:best_browser/Service/Network.dart';
-import 'package:best_browser/Utils/Decoration.dart';
-import 'package:best_browser/Utils/UI_Colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:iBrowser/PoJo/UserModel.dart';
+import 'package:iBrowser/PoJo/WithdrawalMethodModel.dart';
+import 'package:iBrowser/PoJo/WithdrawalRequestModel.dart';
+import 'package:iBrowser/Service/Network.dart';
+import 'package:iBrowser/Utils/Decoration.dart';
+import 'package:iBrowser/Utils/UI_Colors.dart';
 import 'package:intl/intl.dart';
 import 'package:sizer/sizer.dart';
 

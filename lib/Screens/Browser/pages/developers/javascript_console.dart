@@ -1,7 +1,7 @@
-import 'package:best_browser/Screens/Browser/javascript_console_result.dart';
-import 'package:best_browser/Screens/Browser/models/browser_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/javascript_console_result.dart';
+import 'package:iBrowser/Screens/Browser/models/browser_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
 import 'package:provider/provider.dart';
 
 class JavaScriptConsole extends StatefulWidget {

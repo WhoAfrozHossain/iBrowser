@@ -1,24 +1,24 @@
 import 'dart:convert';
 
-import 'package:best_browser/Dialog/LoadingDialog.dart';
-import 'package:best_browser/Dialog/LoginDialog.dart';
-import 'package:best_browser/Dialog/MyDialog.dart';
-import 'package:best_browser/PoJo/AdsModel.dart';
-import 'package:best_browser/PoJo/BookmarkModel.dart';
-import 'package:best_browser/PoJo/CityModel.dart';
-import 'package:best_browser/PoJo/CountryModel.dart';
-import 'package:best_browser/PoJo/InterestModel.dart';
-import 'package:best_browser/PoJo/NewsModel.dart';
-import 'package:best_browser/PoJo/OthersSitesModel.dart';
-import 'package:best_browser/PoJo/SpecialSitesModel.dart';
-import 'package:best_browser/PoJo/UserModel.dart';
-import 'package:best_browser/PoJo/WithdrawalMethodModel.dart';
-import 'package:best_browser/PoJo/WithdrawalRequestModel.dart';
-import 'package:best_browser/Service/LocalData.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart';
+import 'package:iBrowser/Dialog/LoadingDialog.dart';
+import 'package:iBrowser/Dialog/LoginDialog.dart';
+import 'package:iBrowser/Dialog/MyDialog.dart';
+import 'package:iBrowser/PoJo/AdsModel.dart';
+import 'package:iBrowser/PoJo/BookmarkModel.dart';
+import 'package:iBrowser/PoJo/CityModel.dart';
+import 'package:iBrowser/PoJo/CountryModel.dart';
+import 'package:iBrowser/PoJo/InterestModel.dart';
+import 'package:iBrowser/PoJo/NewsModel.dart';
+import 'package:iBrowser/PoJo/OthersSitesModel.dart';
+import 'package:iBrowser/PoJo/SpecialSitesModel.dart';
+import 'package:iBrowser/PoJo/UserModel.dart';
+import 'package:iBrowser/PoJo/WithdrawalMethodModel.dart';
+import 'package:iBrowser/PoJo/WithdrawalRequestModel.dart';
+import 'package:iBrowser/Service/LocalData.dart';
 
 class Network {
   String rootUrl = 'https://agile-anchorage-05164.herokuapp.com/';
@@ -85,7 +85,7 @@ class Network {
     Map<String, dynamic> data = {
       'name': name,
       'phone': "",
-      'email': email,
+      'email': email.toLowerCase(),
       'password': password,
       'gender': "",
       'countryId': localData.read('country'),
@@ -100,6 +100,8 @@ class Network {
         encoding: Encoding.getByName("utf-8"));
 
     jsonData = json.decode(response.body);
+
+    print(jsonData);
 
     Loading().dismiss();
 
@@ -127,7 +129,7 @@ class Network {
     Loading().show(context!);
 
     Map<String, dynamic> data = {
-      'email': email,
+      'email': email.toLowerCase(),
       'password': password,
     };
     var jsonData;

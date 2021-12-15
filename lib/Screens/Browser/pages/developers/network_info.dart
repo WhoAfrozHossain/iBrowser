@@ -1,9 +1,9 @@
-import 'package:best_browser/Screens/Browser/custom_image.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:iBrowser/Screens/Browser/custom_image.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
 import 'package:mime/mime.dart';
 import 'package:provider/provider.dart';
 

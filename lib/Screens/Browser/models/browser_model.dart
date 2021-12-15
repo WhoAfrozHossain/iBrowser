@@ -4,12 +4,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:best_browser/Screens/Browser/models/favorite_model.dart';
-import 'package:best_browser/Screens/Browser/models/web_archive_model.dart';
-import 'package:best_browser/Screens/Browser/models/webview_model.dart';
-import 'package:best_browser/Screens/Browser/webview_tab.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:iBrowser/Screens/Browser/models/favorite_model.dart';
+import 'package:iBrowser/Screens/Browser/models/web_archive_model.dart';
+import 'package:iBrowser/Screens/Browser/models/webview_model.dart';
+import 'package:iBrowser/Screens/Browser/webview_tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'search_engine_model.dart';
@@ -215,7 +215,8 @@ class BrowserModel extends ChangeNotifier {
       final webArchiveFile = File(path);
       try {
         webArchiveFile.deleteSync();
-      } catch (e) {} finally {
+      } catch (e) {
+      } finally {
         _webArchives.remove(webArchive.url.toString());
       }
       notifyListeners();
@@ -229,7 +230,8 @@ class BrowserModel extends ChangeNotifier {
         final webArchiveFile = File(path);
         try {
           webArchiveFile.deleteSync();
-        } catch (e) {} finally {
+        } catch (e) {
+        } finally {
           _webArchives.remove(key);
         }
       }

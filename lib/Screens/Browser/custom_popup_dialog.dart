@@ -1,5 +1,5 @@
-import 'package:best_browser/Screens/Browser/material_transparent_page_route.dart';
 import 'package:flutter/material.dart';
+import 'package:iBrowser/Screens/Browser/material_transparent_page_route.dart';
 
 class CustomPopupDialogPageRoute<T> extends MaterialTransparentPageRoute<T> {
   final Color overlayColor;
